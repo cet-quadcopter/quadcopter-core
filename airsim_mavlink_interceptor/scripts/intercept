@@ -71,7 +71,7 @@ def _create_msg_handler():
 
   return _handler
 
-def _recv_msgs(connection, handler):
+def _recv_sim_msgs(connection, handler):
   msg_rate = ros.Rate(_MSG_FREQUENCY)
 
   while not ros.is_shutdown():
@@ -90,7 +90,7 @@ def _main(sim_ip='127.0.0.1', sim_port=14560, log_level=ros.DEBUG):
   ros.loginfo('Creating mavlink server at {host}:{port}'.format(host=sim_ip, port=sim_port))
   connection = mavutil.mavlink_connection('udpin:{host}:{port}'.format(host=sim_ip, port=sim_port))
 
-  _recv_msgs(connection, _create_msg_handler())
+  _recv_sim_msgs(connection, _create_msg_handler())
 
 if __name__ == '__main__':
   _main()
