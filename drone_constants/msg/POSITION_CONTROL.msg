@@ -1,0 +1,1 @@
+string TOPIC_GPS = sensors/gps
