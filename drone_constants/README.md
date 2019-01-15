@@ -1,0 +1,1 @@
+Constants shared by multiple packages in catkin workspace.

@@ -1,0 +1,1 @@
+Common message formats shared by multiple packages in catkin workspace
