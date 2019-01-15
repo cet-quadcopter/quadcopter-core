@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+
+import argparse
+import rospy as ros
+from pymavlink import mavutil
+from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro
+from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
+
+_DEFAULT_SENSOR_QUEUE_SIZE = 100
+_PUB_FACTORY = lambda topic, msg_type: ros.Publisher(topic, msg_type, queue_size=_DEFAULT_SENSOR_QUEUE_SIZE)
+
+def _create_gps_msg_handler():
+  gps_pub = _PUB_FACTORY(POSITION_CONTROL.TOPIC_GPS, GPS)
+
+  def _handler(msg):
+    gps = GPS(
+      fix_type=msg.fix_type,
+      lat=msg.lat,
+      lon=msg.lon,
+      alt=msg.alt,
+      eph=msg.eph,
+      epv=msg.epv,
+      vel=msg.vel,
+      vn=msg.vn,
+      ve=msg.ve,
+      vd=msg.vd,
+      cog=msg.cog,
+      satellites_visible=msg.satellites_visible
+    )
+
+    gps_pub.publish(gps)
+
+  return _handler
+
+def _create_hil_msg_handler():
+  accelerometer_pub = _PUB_FACTORY(FLIGHT_CONTROL.TOPIC_ACCELEROMETER, Accelerometer)
+  gyro_pub = _PUB_FACTORY(FLIGHT_CONTROL.TOPIC_GYRO, Gyro)
+  compass_pub = _PUB_FACTORY(FLIGHT_CONTROL.TOPIC_COMPASS, Compass)
+  barometer_pub = _PUB_FACTORY(FLIGHT_CONTROL.TOPIC_BAROMETER, Barometer)
+
+  def _handler(msg):
+    acc = Accelerometer(ax=msg.xacc, ay=msg.yacc, az=msg.zacc)
+    accelerometer_pub.publish(acc)
+
+    gyro = Gyro(gx=msg.xgyro, gy=msg.ygyro, gz=msg.zgyro)
+    gyro_pub.publish(gyro)
+
+    compass = Compass(mx=msg.xmag, my=msg.ymag, mz=msg.zmag)
+    compass_pub.publish(compass)
+
+    barometer = Barometer(pabs=msg.abs_pressure, pdiff=msg.diff_pressure)
+    barometer_pub.publish(barometer)
+
+  return _handler
+
+def _create_msg_handler():
+  handler_registry = {
+    'HIL_SENSOR': _create_hil_msg_handler(),
+    'HIL_GPS': _create_gps_msg_handler()
+  }
+
+  def _handler(msg):
+    msg_type = msg.get_type()
+
+    if msg_type not in handler_registry:
+      return
+
+    ros.logdebug_once('Got message {}'.format(msg))
+    handler_registry[msg_type](msg)
+
+  return _handler
+
+def _recv_msgs(connection, handler):
+  while not ros.is_shutdown():
+    message = connection.recv_match(blocking=True)
+    handler(message)
+
+def _main(sim_ip='127.0.0.1', sim_port=14560, log_level=ros.DEBUG):
+  ros.init_node('airsim_interceptor', log_level=log_level)
+
+  ros.loginfo('Creating mavlink server at {host}:{port}'.format(host=sim_ip, port=sim_port))
+  connection = mavutil.mavlink_connection('udpin:{host}:{port}'.format(host=sim_ip, port=sim_port))
+
+  _recv_msgs(connection, _create_msg_handler())
+
+if __name__ == '__main__':
+  _main()
