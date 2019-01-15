@@ -8,6 +8,7 @@ from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
 
 _DEFAULT_SENSOR_QUEUE_SIZE = 100
 _PUB_FACTORY = lambda topic, msg_type: ros.Publisher(topic, msg_type, queue_size=_DEFAULT_SENSOR_QUEUE_SIZE)
+_MSG_FREQUENCY = 100
 
 def _create_gps_msg_handler():
   gps_pub = _PUB_FACTORY(POSITION_CONTROL.TOPIC_GPS, GPS)
@@ -71,9 +72,17 @@ def _create_msg_handler():
   return _handler
 
 def _recv_msgs(connection, handler):
+  msg_rate = ros.Rate(_MSG_FREQUENCY)
+
   while not ros.is_shutdown():
-    message = connection.recv_match(blocking=True)
+    message = connection.recv_match(blocking=False)
+
+    if not message:
+      continue
+    
     handler(message)
+
+    msg_rate.sleep()
 
 def _main(sim_ip='127.0.0.1', sim_port=14560, log_level=ros.DEBUG):
   ros.init_node('airsim_interceptor', log_level=log_level)
