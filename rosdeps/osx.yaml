@@ -1,0 +1,4 @@
+python-pymavlink:
+  osx:
+    pip: 
+      packages: [pymavlink]
