@@ -10,5 +10,5 @@ if [ ! -f ./CMakeLists.txt ]; then
 fi
 
 pushd rosdeps
-sh setup.sh
+  sh setup.sh
 popd
