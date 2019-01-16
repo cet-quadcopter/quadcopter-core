@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+. ./bash/logging.sh
+
 if [ ! $ROS_PACKAGE_PATH ] || [ ! -d $ROS_PACKAGE_PATH ]; then
-  echo "ROS must be installed"
+  error "ROS must be installed"
   exit 0
 fi
 
@@ -10,5 +12,5 @@ if [ ! -f ./CMakeLists.txt ]; then
 fi
 
 pushd rosdeps
-  sh setup.sh
+  ./setup.sh
 popd
