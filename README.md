@@ -15,22 +15,10 @@ cd drone_workspace
 git clone https://github.com/cet-quadcopter/quadcopter-core.git src
 ```
 
-## Update rosdep registry with custom repositories
+## Update rosdep registry with custom repositories and download dependencies
 ``` sh
 cd src
 ./setup.sh
-```
-
-## Download dependencies
-``` sh
-cd ..
-rosdep install --from-paths src --ignore-src -r -y --as-root 'pip:false'
-```
-
-If you are getting permission denied error when running above command, run
-
-``` sh
-rosdep install --from-paths src --ignore-src -r -y
 ```
 
 ## Build and source workspace
