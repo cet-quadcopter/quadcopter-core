@@ -1,14 +1,25 @@
 #!/usr/bin/env python
 
+import os
+import socket
 import argparse
+import threading
 import rospy as ros
 from pymavlink import mavutil
-from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro
+from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro, Propeller
 from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
+
+_MSG_FREQUENCY = 100
+_HEARTBEAT_FREQUENCY = 1
 
 _DEFAULT_SENSOR_QUEUE_SIZE = 100
 _PUB_FACTORY = lambda topic, msg_type: ros.Publisher(topic, msg_type, queue_size=_DEFAULT_SENSOR_QUEUE_SIZE)
-_MSG_FREQUENCY = 100
+
+_SIMULATION_SYSTEM_ID = 142
+_SIMULATION_COMPONENT_ID = 42
+_VEHICLE_SYSTEM_ID = 135
+_VEHICLE_COMPONENT_ID = 1
+
 
 def _create_gps_msg_handler():
   gps_pub = _PUB_FACTORY(POSITION_CONTROL.TOPIC_GPS, GPS)
@@ -84,13 +95,54 @@ def _recv_sim_msgs(connection, handler):
 
     msg_rate.sleep()
 
-def _main(sim_ip='127.0.0.1', sim_port=14560, log_level=ros.DEBUG):
+def _create_propeller_msg_handler(connection):
+  def _handler(propeller):
+    control = [propeller.prop1, propeller.prop2, propeller.prop3, propeller.prop4] + [-1.0] * 12
+    connection.mav.hil_actuator_controls_send(0, control, 0, 0)
+
+  return _handler
+
+def _recv_cmd_msgs(connection):
+  ros.Subscriber(
+    FLIGHT_CONTROL.TOPIC_PROPELLER, Propeller, _create_propeller_msg_handler(connection)
+  )
+
+def _airsim_heartbeat_sender(connection):
+  rate = ros.Rate(1)
+
+  while not ros.is_shutdown():
+    connection.mav.heartbeat_send(
+      mavutil.mavlink.MAV_TYPE_QUADROTOR,
+      mavutil.mavlink.MAV_AUTOPILOT_GENERIC,
+      mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED,
+      0,
+      mavutil.mavlink.MAV_STATE_ACTIVE
+    )
+    rate.sleep()
+
+  return threading.Thread(target=_executor)
+  
+def _main(sim_ip='0.0.0.0', hil_port=14560, sitl_port=14556, log_level=ros.DEBUG, send_heartbeat=False):
   ros.init_node('airsim_interceptor', log_level=log_level)
 
-  ros.loginfo('Creating mavlink server at {host}:{port}'.format(host=sim_ip, port=sim_port))
-  connection = mavutil.mavlink_connection('udpin:{host}:{port}'.format(host=sim_ip, port=sim_port))
+  mavutil.set_dialect('common')
 
-  _recv_sim_msgs(connection, _create_msg_handler())
+  ros.loginfo('Creating HIL mavlink server at {host}:{port}'.format(host=sim_ip, port=hil_port))
+  hil = mavutil.mavlink_connection('udpin:{host}:{port}'.format(host=sim_ip, port=hil_port))
+
+  ros.loginfo('Creating SITL mavlink server at {host}:{port}'.format(host=sim_ip, port=sitl_port))
+  sitl = mavutil.mavlink_connection('udpin:{host}:{port}'.format(host=sim_ip, port=sitl_port))
+
+  ros.loginfo('Waiting for heartbeat from AirSim')
+  sitl.wait_heartbeat()
+  
+  _recv_cmd_msgs(sitl)
+
+  if send_heartbeat: 
+    _airsim_heartbeat_sender(sitl).start()
+
+  _recv_sim_msgs(hil, _create_msg_handler())
+
 
 if __name__ == '__main__':
   _main()
