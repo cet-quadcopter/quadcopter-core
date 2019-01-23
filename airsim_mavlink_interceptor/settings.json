@@ -1,0 +1,20 @@
+{
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "Multirotor",
+  "Vehicles": {
+    "PX4": {
+      "VehicleType": "PX4Multirotor",
+      "UseSerial": false,
+      "LocalHostIp": "127.0.0.1",
+      "LogViewerHostIp": "",
+      "QgcHostIp": "",
+      "UdpIp": "127.0.0.1",
+      "SitlIp": "127.0.0.1",
+      "SimCompID": 42,
+      "SimSysID": 142,
+      "VehicleCompID": 1,
+      "VehicleSysID": 135
+    }
+  }
+}
