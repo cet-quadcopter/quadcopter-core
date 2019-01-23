@@ -108,21 +108,22 @@ def _recv_cmd_msgs(connection):
   )
 
 def _airsim_heartbeat_sender(connection):
-  rate = ros.Rate(1)
-
-  while not ros.is_shutdown():
-    connection.mav.heartbeat_send(
-      mavutil.mavlink.MAV_TYPE_QUADROTOR,
-      mavutil.mavlink.MAV_AUTOPILOT_GENERIC,
-      mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED,
-      0,
-      mavutil.mavlink.MAV_STATE_ACTIVE
-    )
-    rate.sleep()
+  def _executor():
+    rate = ros.Rate(1)
+    
+    while not ros.is_shutdown():
+      connection.mav.heartbeat_send(
+        mavutil.mavlink.MAV_TYPE_QUADROTOR,
+        mavutil.mavlink.MAV_AUTOPILOT_GENERIC,
+        mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED,
+        0,
+        mavutil.mavlink.MAV_STATE_ACTIVE
+      )
+      rate.sleep()
 
   return threading.Thread(target=_executor)
   
-def _main(sim_ip='0.0.0.0', hil_port=14560, sitl_port=14556, log_level=ros.DEBUG, send_heartbeat=False):
+def _main(sim_ip='0.0.0.0', hil_port=14560, sitl_port=14556, log_level=ros.DEBUG, send_heartbeat=True):
   ros.init_node('airsim_interceptor', log_level=log_level)
 
   mavutil.set_dialect('common')
