@@ -2,7 +2,7 @@
 
 . ./bash/logging.sh
 
-if [ ! $ROS_PACKAGE_PATH ] || [ ! -d $ROS_PACKAGE_PATH ]; then
+if [ ! $ROS_PACKAGE_PATH ] ; then
   error "ROS must be installed"
   exit 0
 fi
