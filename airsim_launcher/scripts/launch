@@ -165,13 +165,13 @@ def launch(name, settings, launch_opts):
   env_dir = _get_platform_specific_path(name)
   launch_file = _get_launcher_file(env_dir, name)
 
-  setting_restore = _setup_settings(settings)
   interceptor = roslaunch.core.Node('airsim_mavlink_interceptor', 'intercept')
 
   launch = roslaunch.scriptapi.ROSLaunch()
   launch.start()
   process = launch.launch(interceptor)
 
+  setting_restore = _setup_settings(settings)
   try:
     _start_launcher(launch_file, launch_opts)
   finally:
