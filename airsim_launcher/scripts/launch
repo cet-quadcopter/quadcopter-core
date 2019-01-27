@@ -180,4 +180,6 @@ def launch(name, settings, launch_opts):
 
 if __name__ == '__main__':
   ros.init_node('airsim_launcher', anonymous=False, log_level=ros.DEBUG)
-  launch('Blocks', DEFAULT_SETTINGS, DEFAULT_LAUNCH_OPTS)
+
+  environment = ros.get_param('~environment', 'Blocks')
+  launch(environment, DEFAULT_SETTINGS, DEFAULT_LAUNCH_OPTS)
