@@ -1,0 +1,183 @@
+#!/usr/bin/env python
+
+import platform
+import os
+import stat
+import json
+from random import randint
+
+from pathlib2 import Path
+import wget
+import rospy as ros
+from zipfile import ZipFile
+import roslaunch
+
+ENVIRONMENTS = {
+  'Blocks': {
+    'Darwin': ('https://github.com/cet-quadcopter/AirSim/releases/download/v1.2.0Mac/Blocks.zip', ),
+    'Linux': ('https://github.com/Microsoft/AirSim/releases/download/v1.2.0Linux/Blocks.zip', )
+  }
+}
+
+DEFAULT_SETTINGS = {
+  "SeeDocsAt": "https://github.com/Microsoft/AirSim/blob/master/docs/settings.md",
+  "SettingsVersion": 1.2,
+  "SimMode": "Multirotor",
+  "Vehicles": {
+    "PX4": {
+      "VehicleType": "PX4Multirotor",
+      "UseSerial": False,
+      "LocalHostIp": "127.0.0.1",
+      "LogViewerHostIp": "",
+      "QgcHostIp": "",
+      "UdpIp": "127.0.0.1",
+      "SitlIp": "127.0.0.1",
+      "SimCompID": 42,
+      "SimSysID": 142,
+      "VehicleCompID": 1,
+      "VehicleSysID": 135
+    }
+  }
+}
+
+DEFAULT_LAUNCH_OPTS = '-windowed -resx=910 -resy=512'
+
+class InvalidEnvironmentPackage(Exception):
+  pass
+
+
+def _get_platform_specific_path(name):
+  system = platform.system()
+  env_dir = os.environ.get('AIRSIM_ENVIRONMENTS_DIR')
+  if not env_dir:
+    env_dir = Path.home().joinpath('.airsim_envs')
+  else:
+    env_dir = Path(env_dir)
+  
+  repo_dir = env_dir.joinpath(system)
+
+  return repo_dir.joinpath(name)
+
+
+def _get_launcher_file(path, name):
+  system = platform.system()
+
+  if system == 'Darwin':
+    return path.joinpath('{name}.app'.format(name=name)).joinpath('Contents').joinpath('MacOS').joinpath(name)
+  elif system == 'Linux':
+    return path.joinpath('{name}.sh'.format(name=name))
+  else:
+    raise Exception('Unsupported platform {platform}'.format(platform=system))
+
+
+def _extract_environment(path, name):
+  env_dir = path.parent
+  archive = ZipFile(str(path), allowZip64=True)
+
+  ros.loginfo('Extracting environment {name} to directory {directory}'.format(name=name, directory=env_dir))
+  archive.extractall(path=str(env_dir))
+
+  launcher_file = _get_launcher_file(env_dir, name)
+
+  if not launcher_file.exists():
+    raise Exception('Environment {name} does not contain launcher file {launch}'.format(name=name, launch=launcher_file))
+
+  os.chmod(str(launcher_file), stat.S_IXGRP)
+
+  os.remove(str(path))
+
+
+def _setup_environment(name):
+  if not name in ENVIRONMENTS:
+    raise Exception('Unknown environment {name}'.format(name=name))
+
+  system = platform.system()
+
+  if system not in ENVIRONMENTS[name]:
+    raise Exception('Environment {env} is not available for platform {platform}'.format(env=name, platform=system))
+
+  env_dir = _get_platform_specific_path(name)
+
+  if env_dir.exists() and not env_dir.is_dir():
+    raise Exception('Some file with name {env} exists at path {path}. Move / delete and re-run'.format(env=name, path=env_dir))
+
+  if not env_dir.exists():
+    os.makedirs(str(env_dir))
+
+  launcher_exist = _get_launcher_file(env_dir, name).exists()
+
+  if launcher_exist:
+    return
+
+  download_file = env_dir.joinpath('{}.download'.format(name))
+
+  if download_file.exists():
+    _extract_environment(download_file, name)
+    return 
+    try:
+      _extract_environment(download_file, name)
+      return
+    except InvalidEnvironmentPackage:
+      os.remove(str(download_file))
+
+  ros.loginfo('Environment {} does not exist. Downloading...'.format(name))
+  download_url = ENVIRONMENTS[name][system][0]
+
+  wget.download(download_url, out=str(download_file))
+
+  _extract_environment(download_file, name)
+
+
+def _setup_settings(settings):
+  settings_file_path = os.path.join(str(Path.home()), 'Documents', 'AirSim', 'settings.json')
+  current_file = Path(settings_file_path)
+
+  backup_file = None
+  if current_file.exists():
+    backup_file = current_file.parent.joinpath('settings.bak{}'.format(randint(0, 10000)))
+    current_file.rename(backup_file)
+
+  def restore():
+    try:
+      os.remove(settings_file_path)
+    except e:
+      ros.logerr(e)
+
+    if not backup_file:
+      return
+
+    backup_file.rename(backup_file.parent.joinpath('settings.json'))
+
+  with open(settings_file_path, 'w') as settings_file:
+    json.dump(settings, settings_file)
+
+  return restore
+
+
+def _start_launcher(path, launch_opts):
+  ros.loginfo('Starting {}'.format(path))
+  os.system('{} {}'.format(path, launch_opts))
+
+
+def launch(name, settings, launch_opts):
+  _setup_environment(name)
+
+  env_dir = _get_platform_specific_path(name)
+  launch_file = _get_launcher_file(env_dir, name)
+
+  setting_restore = _setup_settings(settings)
+  interceptor = roslaunch.core.Node('airsim_mavlink_interceptor', 'intercept')
+
+  launch = roslaunch.scriptapi.ROSLaunch()
+  launch.start()
+  process = launch.launch(interceptor)
+
+  try:
+    _start_launcher(launch_file, launch_opts)
+  finally:
+    setting_restore()
+
+
+if __name__ == '__main__':
+  ros.init_node('airsim_launcher', anonymous=False, log_level=ros.DEBUG)
+  launch('Blocks', DEFAULT_SETTINGS, DEFAULT_LAUNCH_OPTS)

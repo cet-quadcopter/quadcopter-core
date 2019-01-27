@@ -3,6 +3,7 @@
 . ../bash/logging.sh
 
 sudo sh -c "echo 'yaml file://$(pwd)/osx.yaml osx' > /etc/ros/rosdep/sources.list.d/10-ros-drone.list"
+sudo sh -c "echo 'yaml file://$(pwd)/python.yaml' >> /etc/ros/rosdep/sources.list.d/10-ros-drone.list"
 
 info "Updating rosdep source list"
 rosdep update

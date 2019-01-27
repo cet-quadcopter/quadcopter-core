@@ -1,0 +1,15 @@
+python-pathlib2:
+  osx:
+    pip: 
+        packages: [pathlib2]
+  ubuntu:
+    pip: 
+        packages: [pathlib2]
+
+python-wget:
+  osx:
+    pip: 
+        packages: [wget]
+  ubuntu:
+    pip: 
+        packages: [wget]
