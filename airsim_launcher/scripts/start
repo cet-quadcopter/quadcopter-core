@@ -16,6 +16,12 @@ ENVIRONMENTS = {
   'Blocks': {
     'Darwin': ('https://github.com/cet-quadcopter/AirSim/releases/download/v1.2.0Mac/Blocks.zip', ),
     'Linux': ('https://github.com/Microsoft/AirSim/releases/download/v1.2.0Linux/Blocks.zip', )
+  },
+  'AirSimNH': {
+    'Linux': ('https://github.com/Microsoft/AirSim/releases/download/v1.2.0Linux/AirSimNH.zip', )
+  },
+  'Warehouse': {
+    'Linux': ('https://github.com/Microsoft/AirSim/releases/download/v1.2.0Linux/Warehouse.zip', )
   }
 }
 
