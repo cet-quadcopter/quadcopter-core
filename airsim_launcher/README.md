@@ -1,4 +1,4 @@
-AirSim Interceptor
+AirSim Launcher
 ====
 
 Launch simulation in diffenrent AirSim environments
