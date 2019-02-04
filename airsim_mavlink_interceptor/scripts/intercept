@@ -9,7 +9,7 @@ from pymavlink import mavutil
 from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro, Propeller
 from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
 
-_MSG_FREQUENCY = 100
+_MSG_FREQUENCY = 1000
 _HEARTBEAT_FREQUENCY = 1
 
 _DEFAULT_SENSOR_QUEUE_SIZE = 100
