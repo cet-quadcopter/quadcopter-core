@@ -51,4 +51,4 @@ qtcreator-*
 CATKIN_IGNORE
 
 # Platform specific CMakeLists.txt
-CMakeLists.txt
+/CMakeLists.txt
