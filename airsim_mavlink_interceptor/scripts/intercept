@@ -123,7 +123,7 @@ def _airsim_heartbeat_sender(connection):
 
   return threading.Thread(target=_executor)
   
-def _main(sim_ip='0.0.0.0', hil_port=14560, sitl_port=14556, log_level=ros.DEBUG, send_heartbeat=True):
+def _main(sim_ip='0.0.0.0', hil_port=14560, sitl_port=14556, log_level=ros.DEBUG, send_heartbeat=False):
   ros.init_node('airsim_interceptor', log_level=log_level)
 
   mavutil.set_dialect('common')
