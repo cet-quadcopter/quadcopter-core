@@ -49,6 +49,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   Accelerometer.msg
+  Attitude.msg
   Barometer.msg
   Compass.msg
   GPS.msg
