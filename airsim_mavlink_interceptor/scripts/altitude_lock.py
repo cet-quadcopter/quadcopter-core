@@ -10,7 +10,8 @@ from drone_commands.msg import Movement
 altitude = 123340
 count = 0
 cmd = 0
-
+control_roll=0
+err_roll=0
 array_roll = [0, 0]
 array_pitch = [0, 0]
 array_yaw = [0, 0]
@@ -107,6 +108,7 @@ if __name__ == '__main__':
     ki_roll = .00001
     set_point = 150000
     p = 1
+    exit = 0
     pub = rospy.Publisher('/actuators/propeller', Propeller, queue_size=10)
 
 
@@ -126,11 +128,45 @@ if __name__ == '__main__':
 
         set_altitude(actuation, actuation, actuation, actuation)
 
+    def roll_oper(set_roll_angle):
+
+        global control_roll,exit,err_roll
+        global cmd
+
+        err_roll = set_roll_angle-roll
+        que_roll.append(err_roll)
+        if len(que_roll) > 20:
+            del que_roll[0]
+        sum_roll = reduce(lambda s, v: s+v, que_roll)
+        control_roll = kp_roll*err_roll+kd_roll *(err_roll-que_roll[-2])+ki_roll*sum_roll
+                        
+        if control_roll > .001*actuation:
+            control_roll = .001*actuation
+        elif control_roll < (-.001*actuation):
+            control_roll = -.001*actuation
+        set_altitude(actuation-control_roll, actuation+control_roll,actuation+control_roll, actuation-control_roll)
+                                    
+        
+        if (np.abs(err_roll) < .5):
+            print "sucess--------------------------------------------------------------"
+            exit = 1
+            cmd = 0
+
     while not rospy.is_shutdown():
         
         altitude_lock(set_point) 
         count += 1
-            
+        if cmd == 1:
+
+            exit = 0
+            roll_oper(5)
+        if exit == 1:
+
+            roll_oper(0)
+
+        kp_roll = .00001
+        kd_roll = .001
+        ki_roll = .00001   
         print "count: %s" % count
         print "sum: %s" % sum
         print "error: %s" % e
@@ -139,45 +175,52 @@ if __name__ == '__main__':
         print "yaw: %s" % yaw
         print "pitch: %s" % pitch
         print "roll: %s" % roll
-        exit = 0
-        if cmd == 1:
+        print "err_roll: ---------------------------------%s" % err_roll
+        print "exit: -----------------------------------------%s" % exit
+        #if cmd == 1:
            	 #set_altitude(actuation,actuation-.001*actuation,actuation-.001*actuation,actuation)
         	#time.sleep(.5)
         	#set_altitude(actuation,actuation+.001*actuation,actuation+.001*actuation,actuation)
            	 #time.sleep(.5)
-            set_roll = 5
-            while not((exit == 2) | rospy.is_shutdown()):
+            #set_roll = 5
+            #while not((exit == 2) | rospy.is_shutdown()):
 
-                altitude_lock(set_point) 
-                err_roll = set_roll-roll
-                que_roll.append(err_roll)
-                if len(que_roll) > 20:
-                    del que_roll[0]
-                sum_roll = reduce(lambda s, v: s+v, que_roll)
-                control_roll = kp_roll*err_roll+kd_roll *(err_roll-que_roll[-2])+ki_roll*sum_roll
+                #altitude_lock(set_point) 
+               # err_roll = set_roll-roll
+               # que_roll.append(err_roll)
+               # if len(que_roll) > 20:
+                #    del que_roll[0]
+               # sum_roll = reduce(lambda s, v: s+v, que_roll)
+               # control_roll = kp_roll*err_roll+kd_roll *(err_roll-que_roll[-2])+ki_roll*sum_roll
                         
-                if control_roll > .001*actuation:
-                    control_roll = .001*actuation
-                if control_roll < (-.001*actuation):
-                    control_roll = -.001*actuation
-                set_altitude(actuation-control_roll, actuation+control_roll,actuation+control_roll, actuation-control_roll)
+               # if control_roll > .001*actuation:
+               #     control_roll = .001*actuation
+              #  if control_roll < (-.001*actuation):
+               #     control_roll = -.001*actuation
+              #  set_altitude(actuation-control_roll, actuation+control_roll,actuation+control_roll, actuation-control_roll)
                                     
-                print "roll: %s" % roll
-                print "control_roll: ---------------------------------%s" % control_roll
-                print "exit: -----------------------------------------%s" % exit
-                if (np.abs(err_roll) < .1):
-                    print "sucess--------------------------------------------------------------"
-                    exit += 1
-                if exit == 1:
-                    set_roll = 0
-                    del que_roll[:]
-                    que_roll = [0, 0]
-            cmd = 0
-        elif cmd == 2:
+             #   print "roll: %s" % roll
+               # print "control_roll: ---------------------------------%s" % control_roll
+               # print "exit: -----------------------------------------%s" % exit
+               # if (np.abs(err_roll) < .5):
+              #      print "sucess--------------------------------------------------------------"
+              #      exit += 1
+              #  if exit == 1:
 
-              set_altitude(actuation, actuation, actuation+.01 * actuation, actuation+.01*actuation)
-              time.sleep(1)
-              set_altitude(actuation, actuation, actuation-.01 * actuation, actuation-.01*actuation)
-              time.sleep(1)
+               #     set_roll = 0
+               #     kp_roll = .000001
+               #     kd_roll = .1
+                #    ki_roll = .000001
+                #    del que_roll[:]
+                  #  que_roll = [0, 0]
+                
+                   
+            #cmd = 0
+        if cmd == 2:
+
+            set_altitude(actuation, actuation, actuation+.01 * actuation, actuation+.01*actuation)
+            time.sleep(1)
+            set_altitude(actuation, actuation, actuation-.01 * actuation, actuation-.01*actuation)
+            time.sleep(1)
             
-              cmd = 0
+            cmd = 0
