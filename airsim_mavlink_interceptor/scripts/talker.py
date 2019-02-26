@@ -44,7 +44,7 @@ def talker():
     rospy.init_node('talker', anonymous=False)
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
-        a1 = int (input(" roll cmd ")) 
+        a1 = int (input(" Enter the cmd ")) 
 	move = Movement(a1, rospy.get_time())
         rospy.loginfo(move)
         pub.publish(move)
