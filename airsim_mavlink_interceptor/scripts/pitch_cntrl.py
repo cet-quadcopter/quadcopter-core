@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # for altitude lock in airsim simulation
 import rospy
-from drone_std_msgs.msg import Propeller, Gyro
+from drone_std_msgs.msg import Propeller, Gyro, Barometer
 
-
+pressure = 0
 count = 0
 def set_pitch(thrust_inp, pitch_inp1, pitch_inp2):
 
