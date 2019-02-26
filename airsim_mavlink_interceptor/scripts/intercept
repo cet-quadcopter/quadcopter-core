@@ -4,9 +4,12 @@ import os
 import socket
 import argparse
 import threading
+
+import numpy as np
 import rospy as ros
 from pymavlink import mavutil
-from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro, Propeller
+
+from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro, Propeller, Attitude
 from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
 
 _MSG_FREQUENCY = 1000
@@ -65,10 +68,27 @@ def _create_hil_msg_handler():
 
   return _handler
 
+def _create_attitude_quaternion_msg_handler():
+  attitude_pub = _PUB_FACTORY(FLIGHT_CONTROL.TOPIC_ATTITUDE, Attitude)
+
+  def _handler(msg):
+    # Convert quaternion representation to euler angles
+    w, x, y, z = msg.q1, msg.q2, msg.q3, msg.q4
+    roll = np.arctan2(2*(w*x + y*z), 1-2*(x**2 + y**2))
+    pitch = np.arcsin(2*(w*y - z*x))
+    yaw = np.arctan2(2*(w*z + x*y), 1-2*(y**2 + z**2))
+
+    attitude = Attitude(roll=roll, yaw=yaw, pitch=pitch)
+    attitude_pub.publish(attitude)
+
+  return _handler
+
+
 def _create_msg_handler():
   handler_registry = {
     'HIL_SENSOR': _create_hil_msg_handler(),
-    'HIL_GPS': _create_gps_msg_handler()
+    'HIL_GPS': _create_gps_msg_handler(),
+    'ATTITUDE_QUATERNION': _create_attitude_quaternion_msg_handler()
   }
 
   def _handler(msg):
