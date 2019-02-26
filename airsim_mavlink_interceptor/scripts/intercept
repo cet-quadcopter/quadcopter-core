@@ -74,9 +74,9 @@ def _create_attitude_quaternion_msg_handler():
   def _handler(msg):
     # Convert quaternion representation to euler angles
     w, x, y, z = msg.q1, msg.q2, msg.q3, msg.q4
-    roll = np.arctan2(2*(w*x + y*z), 1-2*(x**2 + y**2))
-    pitch = np.arcsin(2*(w*y - z*x))
-    yaw = np.arctan2(2*(w*z + x*y), 1-2*(y**2 + z**2))
+    roll = np.arctan2(2*(w*x + y*z), 1-2*(x**2 + y**2)) * (180 / np.pi)
+    pitch = np.arcsin(2*(w*y - z*x)) * (180 / np.pi)
+    yaw = np.arctan2(2*(w*z + x*y), 1-2*(y**2 + z**2)) * (180 / np.pi)
 
     attitude = Attitude(roll=roll, yaw=yaw, pitch=pitch)
     attitude_pub.publish(attitude)
