@@ -21,10 +21,15 @@ yaw = 0
 pitch = 0
 roll = 0
 
+speed_motor_1 = 0
+speed_motor_2 = 0
+speed_motor_3 = 0
+speed_motor_4 = 0
+
 array_time = [0]
 
 
-def set_altitude(motor_inp1, motor_inp2, motor_inp3, motor_inp4):
+def set_propeller(motor_inp1, motor_inp2, motor_inp3, motor_inp4):
 
     #rospy.init_node('altitude_pub',anonymous = True)
     rate = rospy.Rate(10)  # 10hz
@@ -105,8 +110,8 @@ if __name__ == '__main__':
     listener()
     #global kp,kd,ki,kp_roll,kd_roll,ki_roll
     kp = 2.5
-    ki = 0.02
-    kd = 30
+    ki = 0.002
+    kd = 10
 
     kp_roll = .00001
     kd_roll = .001
@@ -143,11 +148,11 @@ if __name__ == '__main__':
         if actuation < 0:
             actuation = .4
 
-        set_altitude(actuation, actuation, actuation, actuation)
+        #set_altitude(actuation, actuation, actuation, actuation)
 
     def roll_oper(set_roll_angle):                            # for roll control
 
-        global control_roll,exit_roll,err_roll
+        global control_roll,exit_roll,err_roll,control_roll
         global cmd
 
         err_roll = set_roll_angle-roll
@@ -161,7 +166,7 @@ if __name__ == '__main__':
             control_roll = .001*actuation
         elif control_roll < (-.001*actuation):
             control_roll = -.001*actuation
-        set_altitude(actuation-control_roll, actuation+control_roll,actuation+control_roll, actuation-control_roll)
+        #set_altitude(actuation-control_roll, actuation+control_roll,actuation+control_roll, actuation-control_roll)
                                     
         if set_roll_angle != 0 :
             if (np.abs(err_roll) < .2):
@@ -172,7 +177,7 @@ if __name__ == '__main__':
 
     def pitch_oper(set_pitch_angle):                          #for pitch control
 
-        global control_pitch,exit_pitch,err_pitch
+        global control_pitch,exit_pitch,err_pitch,control_pitch
         global cmd
 
         err_pitch = set_pitch_angle-pitch
@@ -185,8 +190,8 @@ if __name__ == '__main__':
         if control_pitch > .001*actuation:
             control_pitch = .001*actuation
         elif control_pitch < (-.001*actuation):
-            control_pitch = -.001*actuation
-        set_altitude(actuation+control_pitch, actuation-control_pitch,actuation+control_pitch, actuation-control_pitch)
+              control_pitch = -.001*actuation
+        #set_altitude(actuation+control_pitch, actuation-control_pitch,actuation+control_pitch, actuation-control_pitch)
                                     
         if set_pitch_angle != 0 :
             if (np.abs(err_pitch) < .2):
@@ -196,7 +201,7 @@ if __name__ == '__main__':
 
     def yaw_oper(set_yaw_angle):                          #for yaw control
 
-        global control_yaw,exit_yaw,err_yaw
+        global control_yaw,exit_yaw,err_yaw,control_yaw
         global cmd
 
         err_yaw = set_yaw_angle-yaw
@@ -209,8 +214,8 @@ if __name__ == '__main__':
         if control_yaw > .001*actuation:
             control_yaw = .001*actuation
         elif control_yaw < (-.001*actuation):
-            control_yaw = -.001*actuation
-        set_altitude(actuation+control_yaw, actuation+control_yaw,actuation-control_yaw, actuation-control_yaw)
+              control_yaw = -.001*actuation
+        #set_altitude(actuation+control_yaw, actuation+control_yaw,actuation-control_yaw, actuation-control_yaw)
                                     
         if set_yaw_angle != 0 :
             if (np.abs(err_yaw) < .2):
@@ -251,18 +256,19 @@ if __name__ == '__main__':
             yaw_oper(0)
             
           
+        speed_motor_1 = actuation-control_roll+control_yaw+control_pitch
+        speed_motor_2 = actuation+control_roll+control_yaw-control_pitch
+        speed_motor_3 = actuation+control_roll-control_yaw+control_pitch
+        speed_motor_4 = actuation-control_roll-control_yaw-control_pitch
+
+        set_propeller(speed_motor_1,speed_motor_2,speed_motor_3,speed_motor_4)
+
         print "count: %s" % count
-        print "sum: %s" % sum
-        print "error: %s" % e
         print "Altitude:%s" % altitude
-        print "difference:%s" % diff
         print "yaw: %s" % yaw
         print "pitch: %s" % pitch
         print "roll: %s" % roll
-        print "err_yaw: ---------------------------------%s" % err_yaw
-        print "exit_yaw: -----------------------------------------%s" % exit_yaw
-        print "cmd: -----------------------------------------%s" % cmd
-        print "yaw_ctrl: -----------------------------------------%s" % control_yaw
+       
         
 
         
