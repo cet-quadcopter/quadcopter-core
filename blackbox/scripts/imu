@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+import rospy as ros
+import pandas as pd
+import numpy as np
+from drone_constants.msg import FLIGHT_CONTROL
+from drone_std_msgs.msg import Accelerometer, Gyro, Compass, Attitude
+
+
+def _main():
+  ros.init_node('blackbox', anonymous=False)
+
+  accelerometer = []
+  gyro = []
+  compass = []
+  attitude = []
+
+  def _accelerometer_callback(msg):
+    accelerometer.append([ros.get_time(), msg.ax, msg.ay, msg.az])
+
+  def _gyro_callback(msg):
+    gyro.append([ros.get_time(), msg.gx, msg.gy, msg.gz])
+
+  def _compass_callback(msg):
+    compass.append([ros.get_time(), msg.mx, msg.my, msg.mz])
+
+  def _attitude_callback(msg):
+    attitude.append([ros.get_time(), msg.yaw, msg.pitch, msg.roll])
+
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_ACCELEROMETER, Accelerometer, _accelerometer_callback)
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_GYRO, Gyro, _gyro_callback)
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_COMPASS, Compass, _compass_callback)
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_ATTITUDE, Attitude, _attitude_callback)
+
+  ros.spin()
+
+  accelerometer = pd.DataFrame(accelerometer, columns=['timestamp', 'ax', 'ay', 'az'])
+  gyro = pd.DataFrame(gyro, columns=['timestamp', 'gx', 'gy', 'gz'])
+  compass = pd.DataFrame(compass, columns=['timestamp', 'mx', 'my', 'mz'])
+  attitude = pd.DataFrame(attitude, columns=['timestamp', 'yaw', 'pitch', 'roll'])
+
+  accelerometer.to_csv('accelerometer.csv', index=False)
+  gyro.to_csv('gyro.csv', index=False)
+  compass.to_csv('compass.csv', index=False)
+  attitude.to_csv('attitude.csv', index=False)
+
+if __name__ == '__main__':
+  _main()

@@ -13,3 +13,11 @@ python-wget:
   ubuntu:
     pip: 
         packages: [wget]
+
+python-pandas:
+  osx:
+    pip:
+      packages: ['pandas']
+  ubuntu:
+    pip:
+        packages: ['pandas']
