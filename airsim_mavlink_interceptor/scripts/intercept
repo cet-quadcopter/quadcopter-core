@@ -9,7 +9,7 @@ import numpy as np
 import rospy as ros
 from pymavlink import mavutil
 
-from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro, Propeller, Attitude
+from drone_std_msgs.msg import Accelerometer, Barometer, Compass, GPS, Gyro, Propeller, Attitude, Wrench
 from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
 
 _MSG_FREQUENCY = 1000
@@ -122,9 +122,20 @@ def _create_propeller_msg_handler(connection):
 
   return _handler
 
+def _create_wrench_msg_handler(connection):
+  def _handler(wrench):
+    connection.mav.local_position_ned_send(
+      0, wrench.fx, wrench.fy, wrench.fz, wrench.tx, wrench.ty, wrench.tz)
+
+  return _handler
+
 def _recv_cmd_msgs(connection):
   ros.Subscriber(
     FLIGHT_CONTROL.TOPIC_PROPELLER, Propeller, _create_propeller_msg_handler(connection)
+  )
+
+  ros.Subscriber(
+    FLIGHT_CONTROL.TOPIC_WRENCH, Wrench, _create_wrench_msg_handler(connection)
   )
 
 def _airsim_heartbeat_sender(connection):

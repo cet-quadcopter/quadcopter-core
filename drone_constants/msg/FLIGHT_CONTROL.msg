@@ -5,3 +5,4 @@ string TOPIC_BAROMETER = sensors/barometer
 string TOPIC_ATTITUDE = sensors/attitude
 
 string TOPIC_PROPELLER = actuators/propeller
+string TOPIC_WRENCH = actuators/wrench
