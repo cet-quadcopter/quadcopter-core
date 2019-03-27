@@ -20,13 +20,23 @@ array_yaw = [0, 0]
 yaw = 0
 pitch = 0
 roll = 0
+pitch_desired = 0
+roll_desired = 0
+enter_lat = 0
+err_latitude = 0
+err_longitude = 0
+latitude = 0
+longitude = 0
+pre_err_latitude = 0
+
 
 speed_motor_1 = 0
 speed_motor_2 = 0
 speed_motor_3 = 0
 speed_motor_4 = 0
 
-array_time = [0]
+
+
 
 
 def set_propeller(motor_inp1, motor_inp2, motor_inp3, motor_inp4):
@@ -44,9 +54,10 @@ def set_propeller(motor_inp1, motor_inp2, motor_inp3, motor_inp4):
 
 
 def callback(baro):
-    global altitude
+    global altitude,latitude,longitude
     altitude = float(baro.alt)
-
+    latitude = baro.lat
+    longitude = baro.lon
 
 def cmd_callback(data):
     rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.command_num)
@@ -56,26 +67,7 @@ def cmd_callback(data):
 
 def gyro_callback(angle):
 
-    global array_roll, array_pitch, array_yaw, pitch, roll, yaw, array_time
-
-    #array_roll.append(angle.gx)
-    #array_pitch.append(angle.gy)
-    #array_yaw.append(angle.gz)
-
-    #sum_roll = reduce(lambda s, v: s+v, array_roll)
-    #sum_pitch = reduce(lambda s, v: s+v, array_pitch)
-    #sum_yaw = reduce(lambda s, v: s+v, array_yaw)
-
-    #if len(array_time) > 2:
-     #   del array_time[0]
-
-    #array_time.append(rospy.get_time())
-
-    #interval = array_time[1]-array_time[0]
-
-    #pitch = (((sum_pitch*interval*(1260/22))+180) % 360)-180
-    #roll = (((sum_roll*interval*(1260/22))+180) % 360)-180
-    #yaw = (((sum_yaw*interval*(1260/22))+180) % 360)-180
+    global  pitch, roll, yaw
 
     yaw   = angle.yaw
     pitch = angle.pitch
@@ -105,10 +97,13 @@ if __name__ == '__main__':
     que_roll = [0, 0]
     que_pitch = [0, 0]
     que_yaw = [0, 0]
+    que_lat = [0,0]
+    que_lon = [0,0]
     gps_subscriber()
     gyro()
     listener()
-    #global kp,kd,ki,kp_roll,kd_roll,ki_roll
+    #global enter_lat,err_latitude,pre_err_latitude
+
     kp = 2.5
     ki = 0.002
     kd = 10
@@ -125,12 +120,22 @@ if __name__ == '__main__':
     kd_yaw = .001
     ki_yaw = .00001
 
+    kp_lat = .001
+    kd_lat = .2
+    ki_lat = .0001
+
+    kp_lon = .001
+    kd_lon = .2
+    ki_lon = .0001
+
     set_point = 150000
-    global p
-    p = 0
+    set_latitude_point = 476418000
+    set_longitude_point = -1221403000
+    
     exit_roll = 0
     exit_pitch = 0
     exit_yaw   = 0
+
     pub = rospy.Publisher('/actuators/propeller', Propeller, queue_size=10)
 
 
@@ -222,6 +227,43 @@ if __name__ == '__main__':
                 print "sucess-----------------yaw---------------------------------------------"
                 exit_yaw = 1
                 cmd = 0
+    def latitude_oper(set_latitude):   
+
+        global enter_lat,err_latitude,pitch_desired
+
+        err_latitude = latitude - set_latitude
+        if np.abs(err_latitude) > 10 :
+
+            enter_lat = 1
+            que_lat.append(err_latitude)
+            if len(que_lat) > 20:
+              del que_lat[0]
+            sum_lat = reduce(lambda s, v: s+v, que_lat)
+            pitch_desired = kp_lat * err_latitude + kd_lat*(err_latitude-que_lat[-2])+ki_lat*sum_lat
+            pitch_oper(pitch_desired)
+
+        if np.abs(err_latitude) < 10 :
+            enter_lat = 0
+            pitch_oper(0)
+
+    def longitude_oper(set_longitude):   
+
+        global enter_lon,err_longitude,roll_desired
+
+        err_longitude = set_longitude - longitude
+        if np.abs(err_longitude) > 10 :
+
+            enter_lon = 1
+            que_lon.append(err_longitude)
+            if len(que_lon) > 20:
+              del que_lon[0]
+            sum_lon = reduce(lambda s, v: s+v, que_lon)
+            roll_desired = kp_lon * err_longitude + kd_lon*(err_longitude-que_lon[-2])+ki_lon*sum_lon
+            roll_oper(roll_desired)
+
+        if np.abs(err_longitude) < 10 :
+            enter_lon = 0
+            roll_oper(0)
 
     while not rospy.is_shutdown():
         
@@ -233,18 +275,20 @@ if __name__ == '__main__':
             exit_roll = 0
             roll_oper(5)
         
-        if (exit_roll ==1) | (cmd == 0):
+        #if (exit_roll ==1) | (cmd == 0):
 
-            roll_oper(0)
+         #   roll_oper(0)
+            
 
         if cmd == 2:
 
             exit_pitch = 0
             pitch_oper(5)
         
-        if (exit_pitch ==1) | (cmd == 0):
+        #if (exit_pitch ==1) | (cmd == 0):
 
-            pitch_oper(0)
+            #pitch_oper(0)
+            
 
         if cmd == 3:
 
@@ -254,7 +298,13 @@ if __name__ == '__main__':
         if (exit_yaw ==1) | (cmd == 0):
 
             yaw_oper(0)
-            
+
+        
+        latitude_oper(set_latitude_point)
+
+        longitude_oper(set_longitude_point)
+
+    
           
         speed_motor_1 = actuation-control_roll+control_yaw+control_pitch
         speed_motor_2 = actuation+control_roll+control_yaw-control_pitch
@@ -268,8 +318,13 @@ if __name__ == '__main__':
         print "yaw: %s" % yaw
         print "pitch: %s" % pitch
         print "roll: %s" % roll
+        print "roll desired : %s" %roll_desired
+        print "pitch desired : %s" %pitch_desired
+        #print "cmd: %s" % cmd
+        print "err-longitude: %s" % err_longitude
+        print "err-latitud: %s" % err_latitude
+        #print "enter-lat: %s" % enter_lat
        
-        
 
         
        
