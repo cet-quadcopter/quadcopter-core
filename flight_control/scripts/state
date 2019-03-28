@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+
+from threading import Lock
+
+import numpy as np
+import rospy as ros
+
+from drone_std_msgs.msg import Accelerometer, Compass, Gyro
+from drone_constants.msg import FLIGHT_CONTROL
+from flight_control.state.attitude import AttitudeKF
+from flight_control.quaternion import quaternion_to_euler, quaternion_conjugate, quaternion_rotate
+from flight_control.vector import vector_normalize
+
+
+class CountingAverage(object):
+
+  def __init__(self, post_count, callback):
+    self.post_count = post_count
+    self.callback = callback
+
+    self._reset()
+
+
+  def _reset(self):
+    self._c = 0
+    self._m = None
+
+
+  def post(self, measurement):
+    if self._m is None:
+      self._m = measurement
+    else:
+      self._m = self._m + measurement
+
+    self._c = self._c + 1
+
+    if self._c == self.post_count:
+      self.callback(self._m / self.post_count)
+      
+      self._reset()
+
+
+def _make_measurement_handler(avg, lock, holder={}):
+  def handle_msg(msg):
+    if isinstance(msg, Accelerometer):
+      holder['acc'] = msg
+    elif isinstance(msg, Compass):
+      holder['compass'] = msg
+    else:
+      raise Exception('Unknown msg type')
+
+    if 'acc' not in holder or 'compass' not in holder:
+      return
+
+    acc = holder['acc']
+    compass = holder['compass']
+    measurement = np.array([acc.ax, acc.ay, acc.az, compass.mx, compass.my, compass.mz])
+
+    del holder['acc']
+    del holder['compass']
+
+    avg.post(measurement)
+
+
+  def locked_handler(msg):
+    with lock:
+      handle_msg(msg)
+    
+  return locked_handler
+
+
+def _make_control_handler(avg, lock):
+  def handle_msg(msg):
+    if not isinstance(msg, Gyro):
+      raise Exception('Unknown msg type')
+
+    control_input = np.array([msg.gx, msg.gy, msg.gz])
+    avg.post(control_input)
+
+
+  def locked_handler(msg):
+    with lock:
+      handle_msg(msg)
+  
+  return locked_handler
+
+
+def _main():
+  ros.init_node('state_estimation_test', anonymous=False, log_level=ros.DEBUG)
+
+  filter = AttitudeKF()
+
+  lock = Lock()
+
+  def _m_handler(m):
+    ros.logdebug(np.round(quaternion_to_euler(filter.update(m, ros.get_time())), 0))
+
+  def _c_handler(c):
+    filter.predict(c, ros.get_time())
+
+  m_avg = CountingAverage(33, _m_handler)
+  c_avg = CountingAverage(10, _c_handler)
+
+  measurement_handler = _make_measurement_handler(m_avg, lock)
+  control_handler = _make_control_handler(c_avg, lock)
+
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_ACCELEROMETER, Accelerometer, measurement_handler)
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_COMPASS, Compass, measurement_handler)
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_GYRO, Gyro, control_handler)
+
+  ros.spin()
+
+if __name__ == '__main__':
+  _main()
+  
