@@ -59,7 +59,7 @@ class AttitudeKF(KalmanFilter):
     x_t_m1 = self.x_t_m1
     q_g = AttitudeKF._rotate_q(x_t_m1, g_n, g_b, _MEASUREMENT_ACCELEROMETER_GAIN)
 
-    d_b = quaternion_rotate(q_g, g_n)
+    d_b = quaternion_rotate(quaternion_conjugate(q_g), g_n)
     e_b = vector_normalize(np.cross(d_b, m_b))
     n_b = np.cross(e_b, d_b)
 
