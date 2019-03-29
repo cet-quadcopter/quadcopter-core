@@ -3,7 +3,7 @@ import numpy as np
 from filters import KalmanFilter
 from ..vector import vector_normalize
 from ..quaternion import quaternion_to_dcm, quaternion_multiply, \
-  quaternion_conjugate, quaternion_make, quaternion_rotate, quaternion_normalize, quaternion_to_euler
+  quaternion_conjugate, quaternion_make, quaternion_rotate, quaternion_normalize
 
 _MEASUREMENT_ACCELEROMETER_GAIN = 1
 _MEASUREMENT_MAGNETOMETER_GAIN = 1
