@@ -21,3 +21,11 @@ python-pandas:
   ubuntu:
     pip:
         packages: ['pandas']
+
+python-wrapt:
+  osx:
+    pip:
+      packages: ['wrapt']
+  ubuntu:
+    pip:
+        packages: ['wrapt']
