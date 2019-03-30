@@ -99,3 +99,44 @@ class KalmanFilter(object):
     p_t = (i - k.dot(self.h)).dot(p_p_t)
 
     return x_t, p_t
+
+
+
+class SimpleFilter(object):
+
+  def __init__(self, alpha, initial_state):
+    self._x_t_m1 = initial_state
+    self._t_m1 = time.time()
+    self._alpha = alpha
+
+
+  def calc_prediction(self, control_input, dt, t):
+    unimplemented()
+
+  
+  def calc_measurement(self, measurement, dt, t):
+    unimplemented()
+
+
+  def predict(self, control_input, t):
+    dt = t - self._t_m1
+    x_t = self.calc_prediction(control_input, dt, t)
+    
+    self._x_t_m1 = x_t
+    self._t_m1 = t
+
+    return x_t
+
+
+  def update(self, measurement, t):
+    dt = t - self._t_m1
+    x_t = self.calc_measurement(measurement, dt, t)
+    x_t = self._x_t_m1 + (x_t - self._x_t_m1) * self._alpha
+
+    self._x_t_m1 = x_t
+    self._t_m1 = t
+
+
+  @property
+  def state(self):
+    return self._x_t_m1
