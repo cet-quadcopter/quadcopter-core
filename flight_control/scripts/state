@@ -5,8 +5,8 @@ from threading import Lock
 import numpy as np
 import rospy as ros
 
-from drone_std_msgs.msg import Accelerometer, Compass, Gyro
-from drone_constants.msg import FLIGHT_CONTROL
+from drone_std_msgs.msg import Accelerometer, Compass, Gyro, GPS
+from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
 from flight_control.state.manager import StateManager
 from flight_control.quaternion import quaternion_to_euler
 
@@ -25,14 +25,23 @@ def _main():
   def compass_handler(msg):
     manager.post_magnetometer(np.array([msg.mx, msg.my, msg.mz]))
 
+  def gps_handler(msg):
+    manager.post_gps(np.array([
+      msg.fix_type, msg.lat, msg.lon, msg.alt, 
+      msg.eph, msg.epv, msg.vel, msg.vn, msg.ve, msg.vd, 
+      msg.cog, msg.satellites_visible
+    ]))
+
   manager.start()
 
   ros.Subscriber(FLIGHT_CONTROL.TOPIC_ACCELEROMETER, Accelerometer, acc_handler)
   ros.Subscriber(FLIGHT_CONTROL.TOPIC_COMPASS, Compass, compass_handler)
   ros.Subscriber(FLIGHT_CONTROL.TOPIC_GYRO, Gyro, gyro_handler)
+  ros.Subscriber(POSITION_CONTROL.TOPIC_GPS, GPS, gps_handler)
 
   while not ros.is_shutdown():
     ros.logdebug_throttle(0.5, np.round(quaternion_to_euler(manager.attitude), 1))
+    ros.logdebug_throttle(0.5, np.round(manager.velocity, 1))
 
   manager.stop()
 

@@ -14,3 +14,5 @@ class SensorParams(object):
 
     self.attitude_meas_acc_gain = 0.25
     self.attitude_meas_compass_gain = 0.5
+
+    self.velocity_alpha = np.array([0.3, 0.3, 0.3, 0.5, 0.5, 0.5])
