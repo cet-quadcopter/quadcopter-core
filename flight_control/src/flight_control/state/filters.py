@@ -140,3 +140,28 @@ class SimpleFilter(object):
   @property
   def state(self):
     return self._x_t_m1
+
+
+
+class ComplementaryFilter(object):
+
+  def __init__(self, alpha, initial_state):
+    self._alpha = alpha
+    self._x_t_m1 = initial_state
+    self._t_m1 = time.time()
+
+
+  def calc_prediction(self, control_input, dt, t):
+    unimplemented()
+  
+
+  def update(self, control_input, measurement, t):
+    dt = t - self._t_m1
+
+    x_p_t = self.calc_prediction(control_input, dt, t)
+    x_t = (1 - self._alpha) * x_p_t + self._alpha * measurement
+
+    self._x_t_m1 = x_t
+    self._t_m1 = t
+
+    return x_t
