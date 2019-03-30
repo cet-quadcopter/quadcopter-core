@@ -1,6 +1,11 @@
+import time
+from threading import Thread
+
 import numpy as np
+from wrapt import synchronized
 
 from filters import KalmanFilter
+from base import Sensor, TopicCombiner, DataAccumulator
 from ..vector import vector_normalize
 from ..quaternion import quaternion_to_dcm, quaternion_multiply, \
   quaternion_conjugate, quaternion_make, quaternion_rotate, quaternion_normalize
@@ -19,6 +24,88 @@ _INITIAL_STATE = np.array([1, 0, 0, 0])
 _INITIAL_PROCESS_COVARIANCE = np.identity(4) * 10
 
 
+class AttitudeSensor(Sensor):
+
+  def __init__(self):
+    super(AttitudeSensor, self).__init__()
+
+    self._measurement_combiner = TopicCombiner(
+      self._handle_measurement, ['accelerometer', 'compass'])
+
+    self._measurement_accumulator = DataAccumulator()
+    self._control_accumulator = DataAccumulator()
+
+    self._filter = AttitudeKF()
+    self._q = _INITIAL_STATE
+
+  
+  def post_accelerometer(self, measurement):
+    self._measurement_combiner.post('accelerometer', measurement)
+
+
+  def post_gyro(self, measurement):
+    self._control_accumulator.post(measurement)
+
+
+  def post_magnetometer(self, measurement):
+    self._measurement_combiner.post('compass', measurement)
+
+
+  def _handle_measurement(self, accelerometer, compass):
+    self._measurement_accumulator.post(np.array([accelerometer, compass]).ravel())
+
+
+  def _prediction_worker(self):
+    control = self._control_accumulator.get()
+
+    if control is None:
+      return
+    
+    self._set_state(self._filter.predict(control, time.time()))
+
+
+  def _measurement_worker(self):
+    measurement = self._measurement_accumulator.get()
+
+    if measurement is None:
+      return
+    
+    self._set_state(self._filter.update(measurement, time.time()))
+
+
+  def _worker_cycle(self):
+    self._measurement_worker()
+
+    for _ in range(10):
+      self._prediction_worker()
+
+
+  def _worker(self):
+    while not self._thread is None:
+      self._worker_cycle()
+
+
+  def start(self):
+    self._thread = Thread(target=self._worker)
+    self._thread.start()
+
+
+  def stop(self):
+    self._thread = None
+
+
+  @synchronized
+  def get_state(self):
+    return self._q
+
+
+  @Sensor.mutator
+  @synchronized
+  def _set_state(self, state):
+    self._q = state
+  
+
+
 class AttitudeKF(KalmanFilter):
   
   def __init__(self):
@@ -32,7 +119,7 @@ class AttitudeKF(KalmanFilter):
 
   @classmethod
   def _rotate_q(cls, q, v_n, v_b, gain):
-    v_n_est = quaternion_rotate(q, vector_normalize(v_b))
+    v_n_est = vector_normalize(quaternion_rotate(q, v_b))
     v_n_est_error = np.arccos(v_n.T.dot(v_n_est))
 
     if v_n_est_error == 0:
