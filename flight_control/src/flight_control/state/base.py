@@ -80,10 +80,15 @@ class TopicCombiner(object):
   def post(self, topic, message):
     assert topic in self._topic_registry
 
-    self._messages[topic] = message
+    if topic not in self._messages:
+      self._messages[topic] = {'val': message, 'count': 1}
+    else:
+      self._messages[topic]['val'] = self._messages[topic]['val'] + message
+      self._messages[topic]['count'] = self._messages[topic]['count'] + 1
 
     if len(self._messages) == len(self._topic_registry):
-      self._handler(**self._messages)
+      values = { k: v['val'] / v['count'] for k, v in self._messages.items() }
+      self._handler(**values)
       self._reset()
   
 
