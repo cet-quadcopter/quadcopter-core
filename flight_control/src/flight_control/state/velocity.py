@@ -125,7 +125,6 @@ class VelocityFilter(ComplementaryFilter):
     super(VelocityFilter, self).__init__(alpha, _INITIAL_STATE)
 
     self._alpha_t_m1 = np.array([0, 0, 0])
-    self._omega_t_m1 = np.array([0, 0, 0])
 
 
   def calc_prediction(self, control_input, dt, t):
