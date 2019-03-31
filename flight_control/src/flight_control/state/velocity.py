@@ -25,7 +25,7 @@ class VelocitySensor(Sensor):
 
     self._q = np.array([1, 0, 0, 0])
     self._gyro = np.array([0, 0, 0])
-    self._accelerometer = np.array([0, 0, 0])
+    self._accelerometer = np.array([0, 0, -9.8])
     self._velocity = np.array([0, 0, 0])
     self._state = np.array([0, 0, 0, 0, 0, 0])
 
