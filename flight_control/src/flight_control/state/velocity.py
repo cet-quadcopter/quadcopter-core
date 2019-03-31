@@ -6,7 +6,7 @@ from wrapt import synchronized
 
 from base import Sensor, DataAccumulator
 from filters import ComplementaryFilter
-from ..quaternion import quaternion_rotate
+from ..math.quaternion import quaternion_rotate
 
 
 _INITIAL_STATE = np.array([0, 0, 0, 0, 0, 0])

@@ -6,8 +6,8 @@ from wrapt import synchronized
 
 from filters import KalmanFilter
 from base import Sensor, TopicCombiner, DataAccumulator
-from ..vector import vector_normalize
-from ..quaternion import quaternion_to_dcm, quaternion_multiply, \
+from ..math.vector import vector_normalize
+from ..math.quaternion import quaternion_to_dcm, quaternion_multiply, \
   quaternion_conjugate, quaternion_make, quaternion_rotate, quaternion_normalize
   
 

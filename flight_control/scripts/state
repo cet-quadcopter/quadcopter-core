@@ -8,7 +8,7 @@ import rospy as ros
 from drone_std_msgs.msg import Accelerometer, Compass, Gyro, GPS
 from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
 from flight_control.state.manager import StateManager
-from flight_control.quaternion import quaternion_to_euler
+from flight_control.math.quaternion import quaternion_to_euler
 
 
 def _main():
