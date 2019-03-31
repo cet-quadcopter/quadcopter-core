@@ -8,7 +8,7 @@ import rospy as ros
 from drone_std_msgs.msg import Accelerometer, Compass, Gyro, GPS
 from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
 from flight_control.state.manager import StateManager
-from flight_control.math.quaternion import quaternion_to_euler
+from flight_control.math.quaternion import quaternion_to_euler_123
 
 
 def _main():
@@ -40,7 +40,7 @@ def _main():
   ros.Subscriber(POSITION_CONTROL.TOPIC_GPS, GPS, gps_handler)
 
   while not ros.is_shutdown():
-    ros.logdebug_throttle(0.5, np.round(quaternion_to_euler(manager.attitude), 1))
+    ros.logdebug_throttle(0.5, np.round(quaternion_to_euler_123(manager.attitude), 1))
     ros.logdebug_throttle(0.5, np.round(manager.velocity, 1))
 
   manager.stop()

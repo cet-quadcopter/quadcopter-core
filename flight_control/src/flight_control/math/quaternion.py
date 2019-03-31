@@ -45,8 +45,7 @@ def quaternion_to_dcm(q):
   ])
 
 
-# TODO Check euler rep type
-def quaternion_to_euler(q):
+def quaternion_to_euler_123(q):
   q0, q1, q2, q3 = q
 
   psi = np.arctan2(2 * q2 * q3 + 2 * q0 * q1, q3**2 - q2**2 - q1**2 + q0**2)
