@@ -112,6 +112,7 @@ class VelocitySensor(Sensor):
     self._state = state
 
 
+  @Sensor.mutator
   @synchronized
   def get_state(self):
     return self._state
