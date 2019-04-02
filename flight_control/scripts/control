@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import time
+from threading import Lock
+
+import numpy as np
+import rospy as ros
+
+from drone_std_msgs.msg import Accelerometer, Compass, Gyro, GPS, Propeller
+from drone_constants.msg import FLIGHT_CONTROL, POSITION_CONTROL
+from flight_control.state.manager import StateManager
+from flight_control.velocity_control import VelocityControl
+from flight_control.math.quaternion import quaternion_to_euler_123
+
+
+def _main():
+  ros.init_node('control_test', anonymous=False, log_level=ros.DEBUG)
+
+  manager = StateManager()
+
+  def acc_handler(msg):
+    manager.post_accelerometer(np.array([msg.ax, msg.ay, msg.az]))
+
+  def gyro_handler(msg):
+    manager.post_gyro(np.array([msg.gx, msg.gy, msg.gz]))
+
+  def compass_handler(msg):
+    manager.post_magnetometer(np.array([msg.mx, msg.my, msg.mz]))
+
+  def gps_handler(msg):
+    manager.post_gps(np.array([
+      msg.fix_type, msg.lat, msg.lon, msg.alt, 
+      msg.eph, msg.epv, msg.vel, msg.vn, msg.ve, msg.vd, 
+      msg.cog, msg.satellites_visible
+    ]))
+
+  # manager.start()
+
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_ACCELEROMETER, Accelerometer, acc_handler)
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_COMPASS, Compass, compass_handler)
+  ros.Subscriber(FLIGHT_CONTROL.TOPIC_GYRO, Gyro, gyro_handler)
+  ros.Subscriber(POSITION_CONTROL.TOPIC_GPS, GPS, gps_handler)
+
+  pub_propeller = ros.Publisher(FLIGHT_CONTROL.TOPIC_PROPELLER, Propeller, queue_size=10)
+
+  controller = VelocityControl(manager)
+
+  rate = ros.Rate(100)
+  while not ros.is_shutdown():
+    signal = controller.calc_signal(0, 0, -1, 0)
+
+    pub_propeller.publish(Propeller(*signal))
+    ros.logdebug_throttle(0.2, signal)
+    ros.logdebug_throttle(0.2, np.round(quaternion_to_euler_123(manager.attitude), 1))
+    ros.logdebug_throttle(0.2, np.round(manager.velocity, 2))
+
+    print(rate.remaining())
+    rate.sleep()
+
+  manager.stop()
+
+if __name__ == '__main__':
+  _main()
+  
