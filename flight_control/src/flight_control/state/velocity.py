@@ -95,7 +95,7 @@ class VelocitySensor(Sensor):
   def _worker(self):
     while self._thread is not None:
       self._worker_cycle()
-      time.sleep(0.05)
+      time.sleep(0.01)
   
   
   def start(self):
