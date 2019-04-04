@@ -17,16 +17,13 @@ class KalmanFilter {
   Vector<T, N> x_tm1_;
   Matrix<T, N, N> p_tm1_;
 
-  Matrix<T, N, Y> c_;
-  Matrix<T, N, N> h_;
+  const Matrix<T, N, Y> c_;
+  const Matrix<T, N, N> h_;
 
   public:
-  KalmanFilter(Vector<T, N> x_0, Matrix<T, N, N> p_0, Matrix<T, N, Y> c, Matrix<T, N, N> h) {
+  KalmanFilter(Vector<T, N> x_0, Matrix<T, N, N> p_0, Matrix<T, N, Y> c, Matrix<T, N, N> h): c_(c), h_(h) {
     x_tm1_ = x_0;
     p_tm1_ = p_0;
-
-    c_ = c;
-    h_ = h;
   }
 
   void Update(
@@ -55,8 +52,8 @@ class KalmanFilter {
 template <typename T, size_t N>
 class ComplementaryFilter {
   protected:
-  Vector<T, N> alpha_;
-  Vector<T, N> alpha_inv_;
+  const Vector<T, N> alpha_;
+  const Vector<T, N> alpha_inv_;
   Vector<T, N> x_tm1_;
 
   public:
