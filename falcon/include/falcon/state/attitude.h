@@ -30,7 +30,7 @@ class AttitudeSensor {
 
   public:
   AttitudeSensor(AttitudeSensorParams params);
-  void PostControlInput(const Vector3f& gyro, double dt);
+  void PostControlInput(const Vector3f& gyro, float dt);
   void PostMeasurementInput(const Vector3f& accelerometer, const Vector3f& magnetometer);
   const Vector4f& GetAttitude();
 };

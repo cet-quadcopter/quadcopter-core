@@ -24,7 +24,7 @@ AttitudeSensor::AttitudeSensor(AttitudeSensorParams params): filter_(kInitialSta
   params_ = params;
 }
 
-void AttitudeSensor::PostControlInput(const Vector3f& gyro, double dt) {
+void AttitudeSensor::PostControlInput(const Vector3f& gyro, float dt) {
   auto q = filter_.GetState();
 
   Matrix<float, 4, 3> b;
