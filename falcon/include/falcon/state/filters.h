@@ -52,5 +52,26 @@ class KalmanFilter {
   }
 };
 
+
+template <typename T, size_t N>
+class ComplementaryFilter {
+  protected:
+  const Vector<T, N> alpha_;
+  Vector<T, N> x_tm1_;
+
+  public:
+  ComplementaryFilter(Vector<T, N> alpha) {
+    alpha_ = alpha;
+  }
+
+  void Update(const Vector<T, N>& prediction, const Vector<T, N>& measurement) {
+    x_tm1_ = (1 - alpha_).cwiseProduct(prediction) + alpha_.cwiseProduct(measurement);
+  }
+
+  const Vector<T, N>& GetState() {
+    return x_tm1_;
+  }
+};
+
 };
 };
