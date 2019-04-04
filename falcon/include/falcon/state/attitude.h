@@ -27,7 +27,6 @@ class AttitudeSensor {
   private:
   KalmanFilter<float, 4, 3, 4> filter_;
   AttitudeSensorParams params_;
-  double tm1_;
 
   public:
   AttitudeSensor(AttitudeSensorParams params);
