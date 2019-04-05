@@ -22,7 +22,6 @@ void StateManager::SpinOnce(double t) {
   Vector3f a_b = acc_accelerometer_.Get();
   Vector3f m_b = acc_magnetometer_.Get();
   Vector3f omega_b = acc_gyro_.Get();
-  Vector3f v_n = acc_gps_velocity_.Get();
 
   sensor_attitude_.PostControlInput(omega_b, dt);
   sensor_attitude_.PostMeasurementInput(a_b, m_b);
@@ -38,6 +37,7 @@ void StateManager::SpinOnce(double t) {
   tm1_ = t;
 
   if (acc_gps_velocity_.HasData()) {
+    Vector3f v_n = acc_gps_velocity_.Get();
     sensor_linear_velocity_.PostMeasurementInput(v_n);
     acc_gps_velocity_.Reset();
   }
