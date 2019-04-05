@@ -1,7 +1,8 @@
 #include <iostream>
 
 #include "falcon/state/attitude.h"
-#include "falcon/state/velocity.h"
+#include "falcon/state/linear_velocity.h"
+#include "falcon/state/angular_velocity.h"
 #include "falcon/utils.h"
 
 
@@ -15,14 +16,13 @@ void execAttitudeSensor(AttitudeSensor& sensor) {
 }
 
 
-void execVelocitySensor(VelocitySensor& sensor) {
-  sensor.PostMeasurementInput(
-    Vector3f::Random(),
-    Vector3f::Random(),
-    Vector3f::Random(),
-    Vector4f::Random(),
-    0.1
-  );
+void execLinearVelocitySensor(LinearVelocitySensor& sensor) {
+  sensor.PostControlInput(Vector3f::Random(), Vector4f::Random(), 0.1);
+  sensor.PostMeasurementInput(Vector3f::Random());
+}
+
+void execAngularVelocitySensor(AngularVelocitySensor sensor) {
+  sensor.PostInput(Vector3f::Random(), Vector4f::Random(), 0.1);
 }
 
 
@@ -38,13 +38,20 @@ int main() {
   std::cout << "=== Attitude sensor ===" << std::endl;
   measureFunction(10000, execAttitudeSensor, att_sensor);
 
-  VelocitySensor vel_sensor(VelocitySensorParams {
-    .alpha_linear_velocity = Vector3f(0.2, 0.2, 0.2),
-    .alpha_angular_velocity = Vector3f(0.2, 0.2, 0.2)
+  LinearVelocitySensor linear_vel_sensor(LinearVelocitySensorParams {
+    .covariance_accelerometer = Matrix3f::Identity() * 0.0001,
+    .covariance_gps_velocity = Matrix3f::Identity() * 0.001
   });
 
-  std::cout << "=== Velocity sensor ===" << std::endl;
-  measureFunction(10000, execVelocitySensor, vel_sensor);
+  std::cout << "=== Linear Velocity sensor ===" << std::endl;
+  measureFunction(10000, execLinearVelocitySensor, linear_vel_sensor);
+
+  AngularVelocitySensor angular_vel_sensor(AngularVelocitySensorParams {
+    .alpha = Vector3f(0.2, 0.2, 0.2)
+  });
+
+  std::cout << "=== Angular Velocity sensor ===" << std::endl;
+  measureFunction(10000, execAngularVelocitySensor, angular_vel_sensor);
 
   return 0;
 }

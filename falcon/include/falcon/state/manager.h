@@ -4,15 +4,24 @@
 #include "falcon/utils.h"
 #include "falcon/math/common.h"
 #include "attitude.h"
-#include "velocity.h"
+#include "linear_velocity.h"
+#include "angular_velocity.h"
 
 
 namespace falcon {
 namespace state {
 
+struct SensorParams {
+  AttitudeSensorParams attitude;
+  LinearVelocitySensorParams linear_velocity;
+  AngularVelocitySensorParams angular_velocity;
+};
+
+
 class StateManager {
 private:
-VelocitySensor sensor_velocity_;
+LinearVelocitySensor sensor_linear_velocity_;
+AngularVelocitySensor sensor_angular_velocity_;
 AttitudeSensor sensor_attitude_;
 
 double tm1_;
@@ -23,7 +32,7 @@ math::Accumulator<float, 3> acc_magnetometer_;
 math::Accumulator<float, 3> acc_gps_velocity_;
 
 public:
-StateManager(AttitudeSensorParams attitude_params, VelocitySensorParams velocity_params, double t0);
+StateManager(SensorParams params, double t0);
 void SpinOnce(double t);
 
 void PostAccelerometer(const Eigen::Vector3f& acc);

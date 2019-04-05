@@ -8,11 +8,12 @@ using namespace falcon::state;
 using namespace Eigen;
 
 
-StateManager::StateManager(AttitudeSensorParams attitude_params, VelocitySensorParams velocity_params, double t0)
-: sensor_attitude_(attitude_params), sensor_velocity_(velocity_params), tm1_(t0) {}
+StateManager::StateManager(SensorParams params, double t0)
+: sensor_attitude_(params.attitude), sensor_linear_velocity_(params.linear_velocity), 
+  sensor_angular_velocity_(params.angular_velocity), tm1_(t0) {}
 
 void StateManager::SpinOnce(double t) {
-  if (!acc_accelerometer_.HasData() || !acc_gyro_.HasData() || !acc_magnetometer_.HasData() || !acc_gps_velocity_.HasData()) {
+  if (!acc_accelerometer_.HasData() || !acc_gyro_.HasData() || !acc_magnetometer_.HasData()) {
     spdlog::info("Skipping spin due to lack of data");
     return;
   }
@@ -26,13 +27,20 @@ void StateManager::SpinOnce(double t) {
   sensor_attitude_.PostControlInput(omega_b, dt);
   sensor_attitude_.PostMeasurementInput(a_b, m_b);
 
-  sensor_velocity_.PostMeasurementInput(a_b, omega_b, v_n, GetAttitude(), dt);
+  Vector4f attitude = GetAttitude();
+
+  sensor_linear_velocity_.PostControlInput(a_b, attitude, dt);
+  sensor_angular_velocity_.PostInput(omega_b, attitude, dt);
 
   acc_accelerometer_.Reset();
   acc_magnetometer_.Reset();
   acc_gyro_.Reset();
-  acc_gps_velocity_.Reset();
   tm1_ = t;
+
+  if (acc_gps_velocity_.HasData()) {
+    sensor_linear_velocity_.PostMeasurementInput(v_n);
+    acc_gps_velocity_.Reset();
+  }
 }
 
 void StateManager::PostAccelerometer(const Vector3f& a_b) {
@@ -56,9 +64,9 @@ const Vector4f& StateManager::GetAttitude() {
 }
 
 const Vector3f& StateManager::GetLinearVelocity() {
-  return sensor_velocity_.GetLinearVelocity();
+  return sensor_linear_velocity_.GetLinearVelocity();
 }
 
 const Vector3f& StateManager::GetAngularVelocity() {
-  return sensor_velocity_.GetAngularVelocity();
+  return sensor_angular_velocity_.GetAngularVelocity();
 }

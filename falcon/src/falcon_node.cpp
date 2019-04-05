@@ -22,8 +22,8 @@ class FalconROS {
   StateManager state_manager_;
 
   public:
-  FalconROS(AttitudeSensorParams attitude_params, VelocitySensorParams velocity_params)
-  : state_manager_(attitude_params, velocity_params, ros::Time::now().toSec()) {}
+  FalconROS(SensorParams params)
+  : state_manager_(params, ros::Time::now().toSec()) {}
 
   void HandleAccelerometerMessage(const Accelerometer::ConstPtr& msg) {
     state_manager_.PostAccelerometer(Vector3f(msg->ax, msg->ay, -msg->az));
@@ -56,12 +56,22 @@ int main(int argc, char **argv) {
     .covariance_gyro = Matrix3f::Identity() * 0.0001
   };
 
-  auto velocity_sensor_params = VelocitySensorParams {
-    .alpha_linear_velocity = Vector3f(0.2, 0.2, 0.2),
-    .alpha_angular_velocity = Vector3f(0.2, 0.2, 0.2)
+  auto linear_velocity_sensor_params = LinearVelocitySensorParams {
+    .covariance_accelerometer = Matrix3f::Identity() * 0.0001,
+    .covariance_gps_velocity = Matrix3f::Identity() * 0.001
   };
 
-  auto falcon = FalconROS(attitude_sensor_params, velocity_sensor_params);
+  auto angular_velocity_sensor_params = AngularVelocitySensorParams {
+    .alpha = Vector3f(0.2, 0.2, 0.2)
+  };
+
+  auto sensor_params = SensorParams {
+    .attitude = attitude_sensor_params,
+    .linear_velocity = linear_velocity_sensor_params,
+    .angular_velocity = angular_velocity_sensor_params
+  };
+
+  auto falcon = FalconROS(sensor_params);
 
   auto sub_acc = node.subscribe(FLIGHT_CONTROL::TOPIC_ACCELEROMETER, 10, &FalconROS::HandleAccelerometerMessage, &falcon);
   auto sub_gyro = node.subscribe(FLIGHT_CONTROL::TOPIC_GYRO, 10, &FalconROS::HandleGyroMessage, &falcon);
