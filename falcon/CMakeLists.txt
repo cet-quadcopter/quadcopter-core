@@ -49,8 +49,18 @@ add_executable(${PROJECT_NAME}_node src/falcon_node.cpp)
 set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+add_executable(${PROJECT_NAME}_benchmark_node src/benchmark_node.cpp)
+set_target_properties(${PROJECT_NAME}_benchmark_node PROPERTIES OUTPUT_NAME benchmark_node PREFIX "")
+add_dependencies(${PROJECT_NAME}_benchmark_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 target_link_libraries(${PROJECT_NAME}_node
+  Eigen3::Eigen
+  ${catkin_LIBRARIES}
+  ${PROJECT_NAME}
+)
+
+target_link_libraries(${PROJECT_NAME}_benchmark_node
   Eigen3::Eigen
   ${catkin_LIBRARIES}
   ${PROJECT_NAME}
