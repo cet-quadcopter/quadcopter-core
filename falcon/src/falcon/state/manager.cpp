@@ -1,7 +1,5 @@
 #include "falcon/state/manager.h"
 
-#include <spdlog/spdlog.h>
-
 
 using namespace falcon::math;
 using namespace falcon::state;
@@ -14,7 +12,6 @@ StateManager::StateManager(SensorParams params, double t0)
 
 void StateManager::SpinOnce(double t) {
   if (!acc_accelerometer_.HasData() || !acc_gyro_.HasData() || !acc_magnetometer_.HasData()) {
-    spdlog::info("Skipping spin due to lack of data");
     return;
   }
 
