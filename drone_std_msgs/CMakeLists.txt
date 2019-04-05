@@ -55,6 +55,7 @@ add_message_files(
   GPS.msg
   Gyro.msg
   Propeller.msg
+  Wrench.msg
 )
 
 ## Generate services in the 'srv' folder
