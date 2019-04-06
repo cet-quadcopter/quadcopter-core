@@ -71,5 +71,26 @@ class ComplementaryFilter {
   }
 };
 
+
+template <typename T, size_t N>
+class LowpassFilter {
+  protected:
+  const Vector<T, N> alpha_;
+  const Vector<T, N> alpha_inv_;
+  Vector<T, N> x_tm1_;
+
+  public:
+  LowpassFilter(Vector<T, N> alpha, Vector<T, N> initial_state)
+  : x_tm1_(initial_state), alpha_(alpha), alpha_inv_(Vector<T, N>::Ones() - alpha) {}
+
+  void Update(const Vector<T, N>& measurement) {
+    x_tm1_ = alpha_.cwiseProduct(x_tm1_) + alpha_inv_.cwiseProduct(measurement);
+  }
+
+  const Vector<T, N>& GetState() {
+    return x_tm1_;
+  }
+};
+
 };
 };
