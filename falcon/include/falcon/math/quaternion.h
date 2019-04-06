@@ -60,5 +60,14 @@ inline Vector<T, 4> QuaternionCalcRotation(
   return QuaternionMultiply(q_error, q);
 }
 
+template <typename T>
+inline Vector<T, 3> QuaternionToEuler123(const Vector<T, 4>& q) {
+  T psi = std::atan2(2 * q(2) * q(3) + 2 * q(0) * q(1), q(3) * q(3) - q(2) * q(2) - q(1) * q(1) + q(0) * q(0));
+  T theta = -std::asin(2 * q(1) * q(3) - 2 * q(0) * q(2));
+  T gamma = std::atan2(2 * q(1) * q(2) + 2 * q(0) * q(3), q(1) * q(1) + q(0) * q(0) - q(3) * q(3) - q(2) * q(2));
+
+  return Vector<T, 3>(psi, theta, gamma);
+}
+
 }
 }
