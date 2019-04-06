@@ -8,7 +8,7 @@ using namespace Eigen;
 
 StateManager::StateManager(SensorParams params, double t0)
 : sensor_attitude_(params.attitude), sensor_linear_velocity_(params.linear_velocity), 
-  sensor_angular_velocity_(params.angular_velocity), tm1_(t0) {}
+  sensor_angular_velocity_(params.angular_velocity), sensor_gravity_(params.gravity), tm1_(t0) {}
 
 void StateManager::SpinOnce(double t) {
   if (!acc_accelerometer_.HasData() || !acc_gyro_.HasData() || !acc_magnetometer_.HasData()) {
@@ -20,6 +20,7 @@ void StateManager::SpinOnce(double t) {
   Vector3f m_b = acc_magnetometer_.Get();
   Vector3f omega_b = acc_gyro_.Get();
 
+  sensor_gravity_.PostInput(a_b, dt);
   sensor_attitude_.PostControlInput(omega_b, dt);
   sensor_attitude_.PostMeasurementInput(a_b, m_b);
 
@@ -66,4 +67,8 @@ const Vector3f& StateManager::GetLinearVelocity() {
 
 const Vector3f& StateManager::GetAngularVelocity() {
   return sensor_angular_velocity_.GetAngularVelocity();
+}
+
+const Vector3f& StateManager::GetGravity() {
+  return sensor_gravity_.GetGravity();
 }

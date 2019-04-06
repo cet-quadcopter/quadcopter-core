@@ -6,6 +6,7 @@
 #include "attitude.h"
 #include "linear_velocity.h"
 #include "angular_velocity.h"
+#include "gravity.h"
 
 
 namespace falcon {
@@ -15,6 +16,7 @@ struct SensorParams {
   AttitudeSensorParams attitude;
   LinearVelocitySensorParams linear_velocity;
   AngularVelocitySensorParams angular_velocity;
+  GravitySensorParams gravity;
 };
 
 
@@ -23,6 +25,7 @@ private:
 LinearVelocitySensor sensor_linear_velocity_;
 AngularVelocitySensor sensor_angular_velocity_;
 AttitudeSensor sensor_attitude_;
+GravitySensor sensor_gravity_;
 
 double tm1_;
 
@@ -43,6 +46,7 @@ void PostGPSVelocity(const Eigen::Vector3f& vel);
 const Eigen::Vector4f& GetAttitude();
 const Eigen::Vector3f& GetLinearVelocity();
 const Eigen::Vector3f& GetAngularVelocity();
+const Eigen::Vector3f& GetGravity();
 };
 
 }

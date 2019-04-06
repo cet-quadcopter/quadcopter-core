@@ -45,7 +45,9 @@ class FalconROS {
 
   void HandleGPSMessage(const GPS& msg) {
     state_manager_.PostGPSVelocity(Vector3f(msg.vn, msg.ve, msg.vd));
-    std::cout << QuaternionToEuler123(state_manager_.GetAttitude()) * 180 / M_PI << std::endl;
+    // std::cout << QuaternionToEuler123(state_manager_.GetAttitude()) * 180 / M_PI << std::endl;
+    // std::cout << state_manager_.GetLinearVelocity() << std::endl;
+    std::cout << state_manager_.GetGravity() << std::endl;
   }
 };
 
@@ -71,10 +73,16 @@ int main(int argc, char **argv) {
     .alpha = Vector3f(0.2, 0.2, 0.2)
   };
 
+  auto gravity_sensor_params = GravitySensorParams {
+    .threshold = 0.2,
+    .alpha = Vector3f(0, 0, 0.99)
+  };
+
   auto sensor_params = SensorParams {
     .attitude = attitude_sensor_params,
     .linear_velocity = linear_velocity_sensor_params,
-    .angular_velocity = angular_velocity_sensor_params
+    .angular_velocity = angular_velocity_sensor_params,
+    .gravity = gravity_sensor_params
   };
 
   auto falcon = FalconROS(sensor_params);
