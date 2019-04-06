@@ -54,6 +54,7 @@ add_message_files(
   Compass.msg
   GPS.msg
   Gyro.msg
+  InputVelocity.msg
   Propeller.msg
   Wrench.msg
 )

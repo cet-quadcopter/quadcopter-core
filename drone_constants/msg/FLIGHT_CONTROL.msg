@@ -6,3 +6,5 @@ string TOPIC_ATTITUDE = sensors/attitude
 
 string TOPIC_PROPELLER = actuators/propeller
 string TOPIC_WRENCH = actuators/wrench
+
+string TOPIC_VELOCITY_CONTROL = controls/velocity
