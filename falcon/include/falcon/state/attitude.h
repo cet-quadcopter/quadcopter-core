@@ -23,9 +23,19 @@ struct AttitudeSensorParams {
   Matrix3f covariance_magnetometer;
 };
 
+class AttitudeFilter : public KalmanFilter<float, 4, 3, 4> {
+  public:
+  AttitudeFilter(Vector<float, 4> x_0, Matrix<float, 4, 4> p_0, Matrix<float, 4, 4> c, Matrix<float, 4, 4> h);
+
+  void Predict(
+    const Matrix<float, 4, 4>& a, const Vector<float, 3>& u_t, const Matrix<float, 4, 3> b,
+    const Vector<float, 4>& w_t, const Matrix<float, 4, 4>& q_t
+  ) override;
+};
+
 class AttitudeSensor {
   private:
-  KalmanFilter<float, 4, 3, 4> filter_;
+  AttitudeFilter filter_;
   AttitudeSensorParams params_;
 
   public:

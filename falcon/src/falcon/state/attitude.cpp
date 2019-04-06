@@ -20,6 +20,20 @@ const Vector3f kGravityCap = Vector3f(0, 0, 1);
 const Vector3f kNorthCap = Vector3f(1, 0, 0);
 
 
+AttitudeFilter::AttitudeFilter(
+  Vector<float, 4> x_0, Matrix<float, 4, 4> p_0, Matrix<float, 4, 4> c, Matrix<float, 4, 4> h)
+  : KalmanFilter(x_0, p_0, c, h) {}
+
+void AttitudeFilter::Predict(
+  const Matrix<float, 4, 4>& a, const Vector<float, 3>& u_t, const Matrix<float, 4, 3> b,
+  const Vector<float, 4>& w_t, const Matrix<float, 4, 4>& q_t) {
+  
+  KalmanFilter::Predict(a, u_t, b, w_t, q_t);
+  x_tm1_.normalize();
+}
+
+
+
 AttitudeSensor::AttitudeSensor(AttitudeSensorParams params): filter_(kInitialState, kInitialProcessCovariance, kMeasurementTransform, kProcessCovarianceTransform) {
   params_ = params;
 }
@@ -63,4 +77,3 @@ void AttitudeSensor::PostMeasurementInput(const Vector3f& a_b, const Vector3f& m
 const Vector4f& AttitudeSensor::GetAttitude() {
   return filter_.GetState();
 }
-
