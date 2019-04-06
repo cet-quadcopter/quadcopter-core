@@ -26,7 +26,8 @@ class PIDControl {
     differentiator_(Eigen::Vector<T, N>::Zero()) {}
 
   Eigen::Vector<T, N> GetSignal(Eigen::Vector<T, N> error, float dt) {
-    return kp_ * error + ki_ * integrator_.Update(error, dt) + kd_ * differentiator_.Update(error, dt);
+    return kp_.cwiseProduct(error) + ki_.cwiseProduct(integrator_.Update(error, dt)) 
+      + kd_.cwiseProduct(differentiator_.Update(error, dt));
   }
 };
 
