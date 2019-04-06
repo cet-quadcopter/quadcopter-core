@@ -32,6 +32,6 @@ void LinearVelocitySensor::PostMeasurementInput(const Vector3f& v_n) {
   filter_.Update(v_n, kZ, params_.covariance_gps_velocity);
 }
 
-const Vector3f& LinearVelocitySensor::GetLinearVelocity() {
+const Vector3f& LinearVelocitySensor::GetLinearVelocity() const {
   return filter_.GetState();
 }

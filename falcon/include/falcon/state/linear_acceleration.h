@@ -17,7 +17,7 @@ class LinearAccelerationSensor {
   public:
   LinearAccelerationSensor();
   void PostInput(const Eigen::Vector3f& a_b, const Eigen::Vector3f& g_n, const Eigen::Vector4f& attitutde);
-  const Eigen::Vector<float, 3>& GetLinearAcceleration();
+  const Eigen::Vector<float, 3>& GetLinearAcceleration() const;
 };
 
 }

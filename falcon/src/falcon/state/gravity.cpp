@@ -18,6 +18,6 @@ void GravitySensor::PostInput(const Vector3f& a_b, float dt) {
   }
 }
 
-const Vector3f& GravitySensor::GetGravity() {
+const Vector3f& GravitySensor::GetGravity() const {
   return filter_.GetState();
 }

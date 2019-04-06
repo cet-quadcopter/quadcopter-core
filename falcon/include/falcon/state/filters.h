@@ -44,7 +44,7 @@ class KalmanFilter {
     p_tm1_ = a * p_tm1_ * a.transpose() + q_t;
   }
 
-  const Vector<T, N>& GetState() {
+  const Vector<T, N>& GetState() const {
     return x_tm1_;
   }
 };
@@ -66,7 +66,7 @@ class ComplementaryFilter {
     x_tm1_ = alpha_inv_.cwiseProduct(prediction) + alpha_.cwiseProduct(measurement);
   }
 
-  const Vector<T, N>& GetState() {
+  const Vector<T, N>& GetState() const {
     return x_tm1_;
   }
 };
@@ -87,7 +87,7 @@ class LowpassFilter {
     x_tm1_ = alpha_.cwiseProduct(x_tm1_) + alpha_inv_.cwiseProduct(measurement);
   }
 
-  const Vector<T, N>& GetState() {
+  const Vector<T, N>& GetState() const {
     return x_tm1_;
   }
 };

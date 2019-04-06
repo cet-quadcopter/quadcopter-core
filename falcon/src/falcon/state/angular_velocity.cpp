@@ -25,6 +25,6 @@ void AngularVelocitySensor::PostInput(const Vector3f& g_b, const Vector4f& q_b_n
 }
 
 
-const Vector3f& AngularVelocitySensor::GetAngularVelocity() {
+const Vector3f& AngularVelocitySensor::GetAngularVelocity() const {
   return filter_.GetState();
 }

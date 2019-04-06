@@ -45,11 +45,11 @@ void PostGyro(const Eigen::Vector3f& omega);
 void PostMagnetometer(const Eigen::Vector3f& mag);
 void PostGPSVelocity(const Eigen::Vector3f& vel);
 
-const Eigen::Vector4f& GetAttitude();
-const Eigen::Vector3f& GetLinearVelocity();
-const Eigen::Vector3f& GetAngularVelocity();
-const Eigen::Vector3f& GetGravity();
-const Eigen::Vector3f& GetLinearAcceleration();
+const Eigen::Vector4f& GetAttitude() const;
+const Eigen::Vector3f& GetLinearVelocity() const;
+const Eigen::Vector3f& GetAngularVelocity() const;
+const Eigen::Vector3f& GetGravity() const;
+const Eigen::Vector3f& GetLinearAcceleration() const;
 };
 
 }

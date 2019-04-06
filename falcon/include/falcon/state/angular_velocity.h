@@ -24,7 +24,7 @@ class AngularVelocitySensor {
   public:
   AngularVelocitySensor(AngularVelocitySensorParams params);
   void PostInput(const Eigen::Vector3f& gyro, const Eigen::Vector4f& attitude, float dt);
-  const Eigen::Vector<float, 3>& GetAngularVelocity();
+  const Eigen::Vector<float, 3>& GetAngularVelocity() const;
 };
 
 }

@@ -74,6 +74,6 @@ void AttitudeSensor::PostMeasurementInput(const Vector3f& a_b, const Vector3f& m
   filter_.Update(q_m, kMeasuredStateNoise, r);
 }
 
-const Vector4f& AttitudeSensor::GetAttitude() {
+const Vector4f& AttitudeSensor::GetAttitude() const {
   return filter_.GetState();
 }

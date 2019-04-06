@@ -17,6 +17,6 @@ void LinearAccelerationSensor::PostInput(const Vector3f& a_b, const Vector3f& g_
   x_t_ = g_n - a_n;
 }
 
-const Vector3f& LinearAccelerationSensor::GetLinearAcceleration() {
+const Vector3f& LinearAccelerationSensor::GetLinearAcceleration() const {
   return x_t_;
 }

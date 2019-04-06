@@ -63,22 +63,22 @@ void StateManager::PostGPSVelocity(const Vector3f& v_n) {
   acc_gps_velocity_.Post(v_n);
 }
 
-const Vector4f& StateManager::GetAttitude() {
+const Vector4f& StateManager::GetAttitude() const {
   return sensor_attitude_.GetAttitude();
 }
 
-const Vector3f& StateManager::GetLinearVelocity() {
+const Vector3f& StateManager::GetLinearVelocity() const {
   return sensor_linear_velocity_.GetLinearVelocity();
 }
 
-const Vector3f& StateManager::GetAngularVelocity() {
+const Vector3f& StateManager::GetAngularVelocity() const {
   return sensor_angular_velocity_.GetAngularVelocity();
 }
 
-const Vector3f& StateManager::GetGravity() {
+const Vector3f& StateManager::GetGravity() const {
   return sensor_gravity_.GetGravity();
 }
 
-const Vector3f& StateManager::GetLinearAcceleration() {
+const Vector3f& StateManager::GetLinearAcceleration() const {
   return sensor_linear_acceleration_.GetLinearAcceleration();
 }

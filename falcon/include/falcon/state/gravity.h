@@ -24,7 +24,7 @@ class GravitySensor {
   public:
   GravitySensor(GravitySensorParams params);
   void PostInput(const Eigen::Vector3f& acc, float dt);
-  const Eigen::Vector<float, 3>& GetGravity();
+  const Eigen::Vector<float, 3>& GetGravity() const;
 };
 
 }
