@@ -1,8 +1,12 @@
-#include "ros/ros.h"
+#include <iostream>
+#include <cmath>
+#include <math.h>
 
+#include "ros/ros.h"
 #include "spdlog/spdlog.h"
 #include "Eigen/Dense"
 #include "falcon/state/manager.h"
+#include "falcon/math/quaternion.h"
 #include "drone_constants/FLIGHT_CONTROL.h"
 #include "drone_constants/POSITION_CONTROL.h"
 #include "drone_std_msgs/Accelerometer.h"
@@ -12,6 +16,7 @@
 
 
 using namespace falcon::state;
+using namespace falcon::math;
 using namespace drone_constants;
 using namespace drone_std_msgs;
 using namespace Eigen;
@@ -25,21 +30,22 @@ class FalconROS {
   FalconROS(SensorParams params)
   : state_manager_(params, ros::Time::now().toSec()) {}
 
-  void HandleAccelerometerMessage(const Accelerometer::ConstPtr& msg) {
-    state_manager_.PostAccelerometer(Vector3f(msg->ax, msg->ay, -msg->az));
+  void HandleAccelerometerMessage(const Accelerometer& msg) {
+    state_manager_.PostAccelerometer(Vector3f(-msg.ax, msg.ay, -msg.az));
   }
 
   void HandleGyroMessage(const Gyro& msg) {
-    state_manager_.PostGyro(Vector3f(msg.gx, msg.gy, -msg.gz));
+    state_manager_.PostGyro(Vector3f(-msg.gx, msg.gy, -msg.gz));
   }
 
   void HandleMagnetometerMessage(const Compass& msg) {
-    state_manager_.PostMagnetometer(Vector3f(msg.mx, msg.my, -msg.mz));
+    state_manager_.PostMagnetometer(Vector3f(-msg.mx, msg.my, -msg.mz));
+    state_manager_.SpinOnce(ros::Time::now().toSec());
   }
 
   void HandleGPSMessage(const GPS& msg) {
     state_manager_.PostGPSVelocity(Vector3f(msg.vn, msg.ve, msg.vd));
-    state_manager_.SpinOnce(ros::Time::now().toSec());
+    std::cout << QuaternionToEuler123(state_manager_.GetAttitude()) * 180 / M_PI << std::endl;
   }
 };
 
