@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Eigen/Dense"
+#include "falcon/utils.h"
 #include "falcon/math/calculus.h"
 
 
@@ -20,7 +21,9 @@ class PIDControl {
 
   public:
   PIDControl(Eigen::Vector<T, N> kp, Eigen::Vector<T, N> ki, Eigen::Vector<T, N> kd)
-  : kp_(kp), ki_(ki), kd_(kd), integrator_(Vector<T, N>::Zero()), differentiator_(Vector<T, N>::Zero()) {}
+  : kp_(kp), ki_(ki), kd_(kd), 
+    integrator_(Eigen::Vector<T, N>::Zero()), 
+    differentiator_(Eigen::Vector<T, N>::Zero()) {}
 
   Eigen::Vector<T, N> GetSignal(Eigen::Vector<T, N> error, float dt) {
     return kp_ * error + ki_ * integrator_.Update(error, dt) + kd_ * differentiator_.Update(error, dt);

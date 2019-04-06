@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <Eigen/Dense>
+#include "falcon/utils.h"
 
 
 namespace falcon {
