@@ -22,8 +22,7 @@ LinearVelocitySensor::LinearVelocitySensor(LinearVelocitySensorParams params)
   params_ = params;
 }
 
-void LinearVelocitySensor::PostControlInput(const Vector3f& a_b, const Vector4f& q_b_n, float dt) {
-  Vector3f a_n = QuaternionRotate(q_b_n, a_b);
+void LinearVelocitySensor::PostControlInput(const Vector3f& a_n, float dt) {
   Matrix3f b = DiagonalMatrix<float, 3>(dt, dt, dt);
   Matrix3f w = params_.covariance_accelerometer * dt;
   filter_.Predict(kA, a_n, b, kW, w);

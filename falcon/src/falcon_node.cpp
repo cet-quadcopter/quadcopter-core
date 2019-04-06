@@ -47,7 +47,8 @@ class FalconROS {
     state_manager_.PostGPSVelocity(Vector3f(msg.vn, msg.ve, msg.vd));
     // std::cout << QuaternionToEuler123(state_manager_.GetAttitude()) * 180 / M_PI << std::endl;
     // std::cout << state_manager_.GetLinearVelocity() << std::endl;
-    std::cout << state_manager_.GetGravity() << std::endl;
+    // std::cout << state_manager_.GetGravity() << std::endl;
+    std::cout << state_manager_.GetLinearAcceleration() << std::endl;
   }
 };
 

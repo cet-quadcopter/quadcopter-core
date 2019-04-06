@@ -42,6 +42,7 @@ add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/state/angular_velocity.cpp
   src/${PROJECT_NAME}/state/linear_velocity.cpp
   src/${PROJECT_NAME}/state/gravity.cpp
+  src/${PROJECT_NAME}/state/linear_acceleration.cpp
   src/${PROJECT_NAME}/state/manager.cpp
 )
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

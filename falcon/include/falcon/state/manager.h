@@ -7,6 +7,7 @@
 #include "linear_velocity.h"
 #include "angular_velocity.h"
 #include "gravity.h"
+#include "linear_acceleration.h"
 
 
 namespace falcon {
@@ -26,6 +27,7 @@ LinearVelocitySensor sensor_linear_velocity_;
 AngularVelocitySensor sensor_angular_velocity_;
 AttitudeSensor sensor_attitude_;
 GravitySensor sensor_gravity_;
+LinearAccelerationSensor sensor_linear_acceleration_;
 
 double tm1_;
 
@@ -47,6 +49,7 @@ const Eigen::Vector4f& GetAttitude();
 const Eigen::Vector3f& GetLinearVelocity();
 const Eigen::Vector3f& GetAngularVelocity();
 const Eigen::Vector3f& GetGravity();
+const Eigen::Vector3f& GetLinearAcceleration();
 };
 
 }

@@ -22,7 +22,7 @@ class LinearVelocitySensor {
   
   public:
   LinearVelocitySensor(LinearVelocitySensorParams params);
-  void PostControlInput(const Eigen::Vector3f& accelerometer, const Eigen::Vector4f& attitude, float dt);
+  void PostControlInput(const Eigen::Vector3f& a_n, float dt);
   void PostMeasurementInput(const Eigen::Vector3f& gps_velocity);
   const Eigen::Vector<float, 3>& GetLinearVelocity();
 };

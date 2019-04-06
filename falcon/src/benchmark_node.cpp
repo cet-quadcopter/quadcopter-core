@@ -17,7 +17,7 @@ void execAttitudeSensor(AttitudeSensor& sensor) {
 
 
 void execLinearVelocitySensor(LinearVelocitySensor& sensor) {
-  sensor.PostControlInput(Vector3f::Random(), Vector4f::Random(), 0.1);
+  sensor.PostControlInput(Vector3f::Random(), 0.1);
   sensor.PostMeasurementInput(Vector3f::Random());
 }
 
