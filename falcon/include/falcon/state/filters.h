@@ -26,7 +26,7 @@ class KalmanFilter {
     p_tm1_ = p_0;
   }
 
-  void Update(
+  virtual void Update(
     const Vector<T, Y>& m_t, const Vector<T, N>& z_t, const Matrix<T, N, N> r_t
   ) {
     auto y_t = c_ * m_t + z_t;
@@ -36,7 +36,7 @@ class KalmanFilter {
     p_tm1_ = p_tm1_ - k * p_tm1_;
   }
 
-  void Predict(
+  virtual void Predict(
     const Matrix<T, N, N>& a, const Vector<T, U>& u_t, const Matrix<T, N, U> b,
     const Vector<T, N>& w_t, const Matrix<T, N, N>& q_t
   ) {
