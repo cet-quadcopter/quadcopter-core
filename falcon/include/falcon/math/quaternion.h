@@ -42,8 +42,8 @@ inline Vector<T, 3> QuaternionRotate(const Vector<T, 4>& q, const Vector<T, 3>& 
 
 
 template <typename T>
-inline Vector<T, 4> QuaternionCalcRotation(
-  const Vector<T, 4>& q, const Vector<T, 3>& v_n, const Vector<T, 3>& v_b, float gain
+inline Vector<T, 4> QuaternionCalcError(
+  const Vector<T, 4>& q, const Vector<T, 3>& v_n, const Vector<T, 3>& v_b, float gain=1
 ) {
   Vector<T, 3> v_n_est = QuaternionRotate(q, v_b);
   float v_error = std::acos(v_n_est.dot(v_n) / (v_n_est.norm() * v_n.norm()));
@@ -57,7 +57,15 @@ inline Vector<T, 4> QuaternionCalcRotation(
   Vector<T, 4> q_error = Vector<T, 4>(
     std::cos(v_error * gain / 2), v_rot_axis(0), v_rot_axis(1), v_rot_axis(2));
 
-  return QuaternionMultiply(q_error, q);
+  return q_error;
+}
+
+
+template <typename T>
+inline Vector<T, 4> QuaternionCalcRotation(
+  const Vector<T, 4>& q, const Vector<T, 3>& v_n, const Vector<T, 3>& v_b, float gain
+) {
+  return QuaternionMultiply(QuaternionCalcError(q, v_n, v_b, gain), q);
 }
 
 template <typename T>
