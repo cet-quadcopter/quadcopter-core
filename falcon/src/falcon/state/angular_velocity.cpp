@@ -18,9 +18,9 @@ AngularVelocitySensor::AngularVelocitySensor(AngularVelocitySensorParams params)
 
 
 void AngularVelocitySensor::PostInput(const Vector3f& g_b, const Vector4f& q_b_n, float dt) {
-  auto omega_n = QuaternionRotate(q_b_n, g_b);
-  auto alpha_n = gyro_diff_.Update(GetAngularVelocity(), dt);
-  auto omega_p = GetAngularVelocity() + alpha_n * dt;
+  Vector3f omega_n = QuaternionRotate(q_b_n, g_b);
+  Vector3f alpha_n = gyro_diff_.Update(GetAngularVelocity(), dt);
+  Vector3f omega_p = GetAngularVelocity() + alpha_n * dt;
   filter_.Update(omega_p, omega_n);
 }
 

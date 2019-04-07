@@ -19,9 +19,9 @@ VelocityControl::VelocityControl(VelocityControlParams params, double t0)
   pid_force_(params.force_kp, params.force_ki, params.force_kd),
   pid_torque_(params.torque_kp, params.torque_ki, params.torque_kd) {
 
-  auto kT = params.kT;
-  auto kTau = params.kTau;
-  auto dkT = params.d * kT / std::sqrt(2);
+  float kT = params.kT;
+  float kTau = params.kTau;
+  float dkT = params.d * kT / std::sqrt(2);
 
   Matrix4f a;
   a << -kT  , -kT , -kT  , -kT  ,

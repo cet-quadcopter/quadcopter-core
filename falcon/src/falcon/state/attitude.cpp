@@ -39,7 +39,7 @@ AttitudeSensor::AttitudeSensor(AttitudeSensorParams params): filter_(kInitialSta
 }
 
 void AttitudeSensor::PostControlInput(const Vector3f& gyro, float dt) {
-  auto q = filter_.GetState();
+  Vector4f q = filter_.GetState();
 
   Matrix<float, 4, 3> b;
   b << -q(0), -q(2), -q(3),
@@ -60,7 +60,7 @@ void AttitudeSensor::PostControlInput(const Vector3f& gyro, float dt) {
 }
 
 void AttitudeSensor::PostMeasurementInput(const Vector3f& a_b, const Vector3f& m_b) {
-  auto q = GetAttitude();
+  Vector4f q = GetAttitude();
   Vector4f q_g = QuaternionCalcRotation(q, kGravityCap, a_b.normalized(), params_.accelerometer_gain);
   
   Vector3f d_b = QuaternionRotate(q_g, kGravityCap);
