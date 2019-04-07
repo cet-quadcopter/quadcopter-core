@@ -54,10 +54,10 @@ class FalconROS {
     std::cout << control << std::endl;
 
     Propeller signal;
-    signal.prop1 = control(3);
+    signal.prop1 = control(0);
     signal.prop2 = control(1);
     signal.prop3 = control(2);
-    signal.prop4 = control(0);
+    signal.prop4 = control(3);
 
     pub_control_signal_.publish(signal);
   }
