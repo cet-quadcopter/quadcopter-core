@@ -28,7 +28,7 @@ VelocityControl::VelocityControl(VelocityControlParams params, double t0)
 }
 
 Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) {
-  float dt = tm1_ - t;
+  float dt = t - tm1_;
 
   const Vector3f& v_n = state.GetLinearVelocity();
   const Vector3f& g_n = state.GetGravity();
