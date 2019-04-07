@@ -46,7 +46,7 @@ inline Vector<T, 4> QuaternionCalcError(
   const Vector<T, 4>& q, const Vector<T, 3>& v_n, const Vector<T, 3>& v_b, float gain=1
 ) {
   Vector<T, 3> v_n_est = QuaternionRotate(q, v_b);
-  float v_error = std::acos(v_n_est.dot(v_n) / (v_n_est.norm() * v_n.norm()));
+  float v_error = std::acos(fmax(-1, fmin(1, v_n_est.dot(v_n) / (v_n_est.norm() * v_n.norm()))));
 
   if (v_error == 0) {
     return q;
