@@ -21,6 +21,9 @@ struct VelocityControlParams {
   float kT;
   float kTau;
   float d;
+
+  float fx_max_factor;
+  float fy_max_factor;
 };
 
 
@@ -32,7 +35,7 @@ class VelocityControl {
   Eigen::Vector4f v_n_desired_;
 
   PIDControl<float, 3, 1000> pid_force_;
-  PIDControl<float, 3, 1000> pid_torque_;
+  PIDControl<float, 3, 500> pid_torque_;
 
   double tm1_;
 

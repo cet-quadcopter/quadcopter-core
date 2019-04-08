@@ -38,28 +38,16 @@ class FalconROS {
     control_(control_params, ros::Time::now().toSec()), pub_control_signal_(pub_control_signal) {}
 
   void HandleAccelerometerMessage(const Accelerometer& msg) {
-    state_manager_.PostAccelerometer(Vector3f(msg.ax, -msg.ay, -msg.az));
+    state_manager_.PostAccelerometer(Vector3f(msg.ay, msg.ax, -msg.az));
   }
 
   void HandleGyroMessage(const Gyro& msg) {
-    state_manager_.PostGyro(Vector3f(msg.gx, -msg.gy, -msg.gz));
+    state_manager_.PostGyro(Vector3f(msg.gy, msg.gx, -msg.gz));
   }
 
   void HandleMagnetometerMessage(const Compass& msg) {
-    state_manager_.PostMagnetometer(Vector3f(msg.mx, -msg.my, -msg.mz));
-    state_manager_.SpinOnce(ros::Time::now().toSec());
-
-    auto control = control_.GetControlSignal(state_manager_, ros::Time::now().toSec());
-
-    std::cout << control << std::endl;
-
-    Propeller signal;
-    signal.prop1 = control(0);
-    signal.prop2 = control(1);
-    signal.prop3 = control(2);
-    signal.prop4 = control(3);
-
-    pub_control_signal_.publish(signal);
+    state_manager_.PostMagnetometer(Vector3f(msg.my, msg.mx, -msg.mz));
+    SpinOnce();
   }
 
   void HandleGPSMessage(const GPS& msg) {
@@ -69,6 +57,23 @@ class FalconROS {
   void HandleVelocityControlMessage(const InputVelocity& msg) {
     control_.SetVelocity(Vector4f(msg.v_n, msg.v_e, msg.v_d, msg.omega_d));
   }
+
+  void SpinOnce() {
+    state_manager_.SpinOnce(ros::Time::now().toSec());
+
+    auto control = control_.GetControlSignal(state_manager_, ros::Time::now().toSec());
+
+    // std::cout << control << std::endl;
+    // std::cout << QuaternionToEuler123(state_manager_.GetAttitude()) * 180 / M_PI << std::endl;
+
+    Propeller signal;
+    signal.prop1 = control(0);
+    signal.prop2 = control(1);
+    signal.prop3 = control(2);
+    signal.prop4 = control(3);
+
+    pub_control_signal_.publish(signal);
+  }
 };
 
 
@@ -77,8 +82,8 @@ int main(int argc, char **argv) {
   ros::NodeHandle node;
 
   auto attitude_sensor_params = AttitudeSensorParams {
-    .accelerometer_gain = 0.2,
-    .magnetometer_gain = 0.5,
+    .accelerometer_gain = 0.9,
+    .magnetometer_gain = 0.9,
     .covariance_accelerometer = Matrix3f::Identity() * 0.0001,
     .covariance_magnetometer = Matrix3f::Identity() * 0.0001,
     .covariance_gyro = Matrix3f::Identity() * 0.0001
@@ -106,16 +111,18 @@ int main(int argc, char **argv) {
   };
 
   auto control_params = VelocityControlParams {
-    .force_kp = Vector3f(1, 1, 1) * 5,
-    .force_ki = Vector3f(1, 1, 1) * 0,
-    .force_kd = Vector3f(1, 1, 1) * 0,
-    .torque_kp = Vector3f(1, 1, 1) * 0.01,
+    .force_kp = Vector3f(1, 1, 50) * 0.5,
+    .force_ki = Vector3f(0, 0, 1) * 0,
+    .force_kd = Vector3f(1, 1, 1) * 0.25,
+    .torque_kp = Vector3f(1, 1, 1) * 500,
     .torque_ki = Vector3f(1, 1, 1) * 0,
     .torque_kd = Vector3f(1, 1, 1) * 0,
     .m = 2.5,
-    .d = 0.015,
+    .d = 150,
     .kT = 25,
-    .kTau = 50
+    .kTau = 12.5,
+    .fx_max_factor = static_cast<float>(std::tan(5.0 * M_PI / 180.0)),
+    .fy_max_factor = static_cast<float>(std::tan(5.0 * M_PI / 180.0))
   };
 
   auto pub_control_signal = node.advertise<Propeller>(FLIGHT_CONTROL::TOPIC_PROPELLER, 10);
@@ -129,6 +136,15 @@ int main(int argc, char **argv) {
   auto sub_velocity_control = node.subscribe(
     FLIGHT_CONTROL::TOPIC_VELOCITY_CONTROL, 10, &FalconROS::HandleVelocityControlMessage, &falcon);
 
+  // auto rate = ros::Rate(1000);
+
+  // while (ros::ok()) {
+  //   ros::spinOnce();
+  //   falcon.SpinOnce();
+  //   rate.sleep();
+  // }
+
   ros::spin();
+
   return 0;
 }
