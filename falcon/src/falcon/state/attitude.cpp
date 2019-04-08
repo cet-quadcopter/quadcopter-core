@@ -1,5 +1,6 @@
 #include "falcon/state/attitude.h"
 
+#include <math.h>
 #include <cmath>
 #include "falcon/math/quaternion.h"
 
@@ -17,7 +18,8 @@ const Vector4f kPredictedStateNoise = Vector4f::Zero();
 const Vector4f kMeasuredStateNoise = Vector4f::Zero();
 
 const Vector3f kGravityCap = Vector3f(0, 0, 1);
-const Vector3f kNorthCap = Vector3f(1, 0, 0);
+const float kMagneticInclination = -7.65 * M_PI / 180.0;
+const Vector3f kNorthCap = Vector3f(std::cos(kMagneticInclination), std::sin(kMagneticInclination), 0);
 
 
 AttitudeFilter::AttitudeFilter(
