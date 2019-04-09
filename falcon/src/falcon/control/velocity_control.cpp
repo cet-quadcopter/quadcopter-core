@@ -27,7 +27,7 @@ VelocityControl::VelocityControl(VelocityControlParams params, double t0)
   Matrix4f a;
   a << -kT  , -kT , -kT  , -kT  ,
         dkT , -dkT,  dkT , -dkT ,
-       -dkT ,  dkT,  dkT , -dkT ,
+        dkT , -dkT, -dkT ,  dkT ,
         kTau, kTau, -kTau, -kTau;
   
   a_inv_ = a.inverse();
@@ -67,7 +67,7 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
   std::cout << "tau" << std::endl;
   std::cout << tau << std::endl;
 
-  Vector4f w = Vector4f(f_b(2), 0, -tau(1), 0);
+  Vector4f w = Vector4f(f_b(2), -tau(0), -tau(1), 0);
   Vector4f omega = (a_inv_ * w).array().sqrt();
 
   if (omega.maxCoeff() > 1) {

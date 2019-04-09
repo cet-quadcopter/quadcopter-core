@@ -38,15 +38,15 @@ class FalconROS {
     control_(control_params, ros::Time::now().toSec()), pub_control_signal_(pub_control_signal) {}
 
   void HandleAccelerometerMessage(const Accelerometer& msg) {
-    state_manager_.PostAccelerometer(Vector3f(msg.ay, msg.ax, -msg.az));
+    state_manager_.PostAccelerometer(Vector3f(msg.ay, -msg.ax, -msg.az));
   }
 
   void HandleGyroMessage(const Gyro& msg) {
-    state_manager_.PostGyro(Vector3f(msg.gy, msg.gx, -msg.gz));
+    state_manager_.PostGyro(Vector3f(msg.gy, -msg.gx, -msg.gz));
   }
 
   void HandleMagnetometerMessage(const Compass& msg) {
-    state_manager_.PostMagnetometer(Vector3f(msg.my, msg.mx, -msg.mz));
+    state_manager_.PostMagnetometer(Vector3f(msg.my, -msg.mx, -msg.mz));
     SpinOnce();
   }
 
