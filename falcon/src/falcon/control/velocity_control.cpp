@@ -28,7 +28,7 @@ VelocityControl::VelocityControl(VelocityControlParams params, double t0)
   a << -kT  , -kT , -kT  , -kT  ,
         dkT , -dkT,  dkT , -dkT ,
         dkT , -dkT, -dkT ,  dkT ,
-        kTau, kTau, -kTau, -kTau;
+       -kTau, -kTau, kTau,  kTau;
   
   a_inv_ = a.inverse();
 }
@@ -37,10 +37,12 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
   float dt = t - tm1_;
 
   const Vector3f& v_n = state.GetLinearVelocity();
+  const Vector3f& o_n = state.GetAngularVelocity();
   const Vector3f& g_n = state.GetGravity();
   const Vector4f& q_b_n = state.GetAttitude();
 
   Vector3f linear_velocity_error = v_n_desired_.head<3>() - v_n;
+  float angular_velocity_error = v_n_desired_(3) - o_n(2);
 
   Vector3f a_n = pid_force_.GetSignal(linear_velocity_error, dt);
   Vector3f f_n = params_.m * a_n - params_.m * g_n;
@@ -53,6 +55,9 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
 
   Vector4f q_error = QuaternionCalcError(QuaternionConjugate(q_b_n), f_b, f_n);
 
+  std::cout << "o_n" << std::endl;
+  std::cout << o_n << std::endl;
+
   std::cout << "f_n" << std::endl;
   std::cout << f_n << std::endl;
 
@@ -62,12 +67,13 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
   std::cout << "q_error" << std::endl;
   std::cout << q_error << std::endl;
 
-  Vector3f tau = pid_torque_.GetSignal(q_error.tail<3>(), dt);
+  Vector3f tau_error = Vector3f(q_error(1), q_error(2), angular_velocity_error);
+  Vector3f tau = pid_torque_.GetSignal(tau_error, dt);
 
   std::cout << "tau" << std::endl;
   std::cout << tau << std::endl;
 
-  Vector4f w = Vector4f(f_b(2), -tau(0), -tau(1), 0);
+  Vector4f w = Vector4f(f_b(2), -tau(0), -tau(1), tau(2));
   Vector4f omega = (a_inv_ * w).array().sqrt();
 
   if (omega.maxCoeff() > 1) {
@@ -79,6 +85,7 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
 
   std::cout << "v_n error" << std::endl;
   std::cout << v_n_desired_.head<3>() - v_n << std::endl;
+  std::cout << "o_n error : " << angular_velocity_error << std::endl;
 
   tm1_ = t;
 

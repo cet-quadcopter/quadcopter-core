@@ -114,13 +114,13 @@ int main(int argc, char **argv) {
     .force_kp = Vector3f(1, 1, 50) * 0.5,
     .force_ki = Vector3f(0, 0, 1) * 0,
     .force_kd = Vector3f(1, 1, 1) * 0.25,
-    .torque_kp = Vector3f(1, 1, 1) * 500,
+    .torque_kp = Vector3f(1, 1, .01) * 500,
     .torque_ki = Vector3f(1, 1, 1) * 0,
     .torque_kd = Vector3f(1, 1, 1) * 0,
     .m = 2.5,
     .d = 150,
     .kT = 25,
-    .kTau = 12.5,
+    .kTau = 125,
     .fx_max_factor = static_cast<float>(std::tan(5.0 * M_PI / 180.0)),
     .fy_max_factor = static_cast<float>(std::tan(5.0 * M_PI / 180.0))
   };
