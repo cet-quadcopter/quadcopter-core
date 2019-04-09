@@ -13,12 +13,6 @@ body {
 .zone {
   position: relative;
   display: inline-block;
-  width: 49%;
+  width: 33%;
   height:300px;
-}
-#jLeft {
-  background: rgba(0,0,255, 0.1);
-}
-#jRight {
-  background: rgba(255,0,0, 0.1);
 }
