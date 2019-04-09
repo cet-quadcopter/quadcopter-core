@@ -1,8 +1,24 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  -ms-touch-action:none;
+  position: relative;
+  width: 100%;
+  padding: 0;
 }
 
-a {
-  color: #00B7FF;
+.slider {
+  top: 0;
+  position: absolute;
+  height: 300px;
+}
+.zone {
+  position: relative;
+  display: inline-block;
+  width: 49%;
+  height:300px;
+}
+#jLeft {
+  background: rgba(0,0,255, 0.1);
+}
+#jRight {
+  background: rgba(255,0,0, 0.1);
 }
