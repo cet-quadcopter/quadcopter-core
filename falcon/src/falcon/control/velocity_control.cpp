@@ -46,6 +46,7 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
 
   Vector3f a_n = pid_force_.GetSignal(linear_velocity_error, dt);
   Vector3f f_n = params_.m * a_n - params_.m * g_n;
+  f_n(2) = fmin(-1, f_n(2));
   float fx_max = abs(f_n(2) * params_.fx_max_factor);
   float fy_max = abs(f_n(2) * params_.fy_max_factor);
   f_n(0) = fmax(-fx_max, fmin(fx_max, f_n(0)));
