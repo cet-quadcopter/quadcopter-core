@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
   };
 
   auto control_params = VelocityControlParams {
-    .force_kp = Vector3f(1, 1, 50) * 0.5,
+    .force_kp = Vector3f(1, 1, 50) * 0.25,
     .force_ki = Vector3f(0, 0, 1) * 0,
     .force_kd = Vector3f(1, 1, 1) * 0.25,
     .torque_kp = Vector3f(1, 1, .01) * 500,
