@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <math.h>
 
 #include <Eigen/Dense>
 #include "../utils.h"
@@ -45,14 +46,29 @@ template <typename T>
 inline Vector<T, 4> QuaternionCalcError(
   const Vector<T, 4>& q, const Vector<T, 3>& v_n, const Vector<T, 3>& v_b, float gain=1
 ) {
-  Vector<T, 3> v_n_est = QuaternionRotate(q, v_b);
-  float v_error = std::acos(fmax(-1, fmin(1, v_n_est.dot(v_n) / (v_n_est.norm() * v_n.norm()))));
+  Vector<T, 3> v_n_norm = v_n.normalized();
+  Vector<T, 3> v_b_norm = v_b.normalized();
+  Vector<T, 3> v_n_est = QuaternionRotate(q, v_b_norm);
 
-  if (v_error == 0) {
+  float v_error_c = fmax(-1, fmin(1, v_n_est.dot(v_n_norm)));
+
+  if (v_error_c == 0) {
     return q;
   }
 
-  Vector<T, 3> v_rot_axis = v_n_est.cross(v_n).normalized() * std::sin(v_error * gain / 2);
+  Vector<T, 3> v_rot_axis = v_n_est.cross(v_n_norm);
+  v_rot_axis.normalize();
+
+  float v_error_s = v_rot_axis.dot(v_n_est.cross(v_n_norm));
+
+  float v_error = std::atan2(v_error_s, v_error_c);
+
+  if (v_error > M_PI) {
+    v_error = 2 * M_PI - v_error;
+    v_rot_axis *= -1;
+  }
+
+  v_rot_axis *= std::sin(v_error * gain / 2);
 
   Vector<T, 4> q_error = Vector<T, 4>(
     std::cos(v_error * gain / 2), v_rot_axis(0), v_rot_axis(1), v_rot_axis(2));
