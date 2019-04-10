@@ -1,5 +1,3 @@
-#define FALCON_DEBUG_VELOCITY_CONTROL = 0
-
 #include "falcon/control/velocity_control.h"
 
 #include <iostream>

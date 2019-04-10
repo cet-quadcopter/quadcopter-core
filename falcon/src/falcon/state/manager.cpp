@@ -1,5 +1,3 @@
-#define FALCON_DEBUG_STATE_MANAGER = 0
-
 #include "falcon/state/manager.h"
 
 #include <math.h>
