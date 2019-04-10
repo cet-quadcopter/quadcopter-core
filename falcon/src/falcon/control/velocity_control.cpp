@@ -1,12 +1,14 @@
+#define DEBUG_VELOCITY_CONTROL = 0
+
 #include "falcon/control/velocity_control.h"
 
 #include <iostream>
 #include <cmath>
-
 #include <math.h>
+
+#include "Eigen/Dense"
 #include "falcon/math/quaternion.h"
 #include "falcon/math/common.h"
-#include "Eigen/Dense"
 
 
 using namespace Eigen;
@@ -46,6 +48,7 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
 
   Vector3f a_n = pid_force_.GetSignal(linear_velocity_error, dt);
   Vector3f f_n = params_.m * a_n - params_.m * g_n;
+
   f_n(2) = fmin(-1, f_n(2));
   float fx_max = abs(f_n(2) * params_.fx_max_factor);
   float fy_max = abs(f_n(2) * params_.fy_max_factor);
@@ -56,6 +59,18 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
 
   Vector4f q_error = QuaternionCalcError(QuaternionConjugate(q_b_n), f_b, f_n);
 
+  Vector3f tau_error = Vector3f(q_error(1), q_error(2), angular_velocity_error);
+  Vector3f tau = pid_torque_.GetSignal(tau_error, dt);
+  Vector4f w = Vector4f(f_b(2), -tau(0), -tau(1), tau(2));
+  Vector4f omega = (a_inv_ * w).array().sqrt();
+
+  if (omega.maxCoeff() > 1) {
+    omega /= omega.maxCoeff();
+  }
+
+  tm1_ = t;
+
+#ifdef DEGUB_VELOCITY_CONTROL
   std::cout << "o_n" << std::endl;
   std::cout << o_n << std::endl;
 
@@ -68,18 +83,8 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
   std::cout << "q_error" << std::endl;
   std::cout << q_error << std::endl;
 
-  Vector3f tau_error = Vector3f(q_error(1), q_error(2), angular_velocity_error);
-  Vector3f tau = pid_torque_.GetSignal(tau_error, dt);
-
   std::cout << "tau" << std::endl;
   std::cout << tau << std::endl;
-
-  Vector4f w = Vector4f(f_b(2), -tau(0), -tau(1), tau(2));
-  Vector4f omega = (a_inv_ * w).array().sqrt();
-
-  if (omega.maxCoeff() > 1) {
-    omega /= omega.maxCoeff();
-  }
 
   std::cout << "omega" << std::endl;
   std::cout << omega << std::endl;
@@ -87,8 +92,7 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
   std::cout << "v_n error" << std::endl;
   std::cout << v_n_desired_.head<3>() - v_n << std::endl;
   std::cout << "o_n error : " << angular_velocity_error << std::endl;
-
-  tm1_ = t;
+#endif
 
   return omega;
 }

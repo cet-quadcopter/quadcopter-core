@@ -1,4 +1,11 @@
+#define DEBUG_STATE_MANAGER = 0
+
 #include "falcon/state/manager.h"
+
+#include <math.h>
+#include <iostream>
+
+#include "falcon/math/quaternion.h"
 
 
 using namespace falcon::math;
@@ -45,6 +52,23 @@ void StateManager::SpinOnce(double t) {
     sensor_linear_velocity_.PostMeasurementInput(v_n);
     acc_gps_velocity_.Reset();
   }
+
+#ifdef DEBUG_STATE_MANAGER
+  std::cout << "Attitude" << std::endl;
+  std::cout << QuaternionToEuler123(attitude) * 180 / M_PI << std::endl;
+
+  std::cout << "Gravity" << std::endl;
+  std::cout << gravity << std::endl;
+
+  std::cout << "Linear acceleration" << std::endl;
+  std::cout << linear_acceleration << std::endl;
+
+  std::cout << "Linear velocity" << std::endl;
+  std::cout << GetLinearVelocity() << std::endl;
+
+  std::cout << "Angular velocity" << std::endl;
+  std::cout << GetAngularVelocity() << std::endl;
+#endif
 }
 
 void StateManager::PostAccelerometer(const Vector3f& a_b) {
