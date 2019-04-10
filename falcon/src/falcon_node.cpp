@@ -63,9 +63,6 @@ class FalconROS {
 
     auto control = control_.GetControlSignal(state_manager_, ros::Time::now().toSec());
 
-    // std::cout << control << std::endl;
-    // std::cout << QuaternionToEuler123(state_manager_.GetAttitude()) * 180 / M_PI << std::endl;
-
     Propeller signal;
     signal.prop1 = control(0);
     signal.prop2 = control(1);
@@ -135,14 +132,6 @@ int main(int argc, char **argv) {
   auto sub_gps = node.subscribe(POSITION_CONTROL::TOPIC_GPS, 10, &FalconROS::HandleGPSMessage, &falcon);
   auto sub_velocity_control = node.subscribe(
     FLIGHT_CONTROL::TOPIC_VELOCITY_CONTROL, 10, &FalconROS::HandleVelocityControlMessage, &falcon);
-
-  // auto rate = ros::Rate(1000);
-
-  // while (ros::ok()) {
-  //   ros::spinOnce();
-  //   falcon.SpinOnce();
-  //   rate.sleep();
-  // }
 
   ros::spin();
 
