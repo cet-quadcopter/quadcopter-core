@@ -1,4 +1,4 @@
-#define DEBUG_STATE_MANAGER = 0
+#define FALCON_DEBUG_STATE_MANAGER = 0
 
 #include "falcon/state/manager.h"
 
@@ -53,7 +53,7 @@ void StateManager::SpinOnce(double t) {
     acc_gps_velocity_.Reset();
   }
 
-#ifdef DEBUG_STATE_MANAGER
+#ifdef FALCON_DEBUG_STATE_MANAGER
   std::cout << "Attitude" << std::endl;
   std::cout << QuaternionToEuler123(attitude) * 180 / M_PI << std::endl;
 

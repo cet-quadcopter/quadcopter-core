@@ -1,4 +1,4 @@
-#define DEBUG_VELOCITY_CONTROL = 0
+#define FALCON_DEBUG_VELOCITY_CONTROL = 0
 
 #include "falcon/control/velocity_control.h"
 
@@ -70,7 +70,7 @@ Vector4f VelocityControl::GetControlSignal(const StateManager& state, double t) 
 
   tm1_ = t;
 
-#ifdef DEGUB_VELOCITY_CONTROL
+#ifdef FALCON_DEGUB_VELOCITY_CONTROL
   std::cout << "o_n" << std::endl;
   std::cout << o_n << std::endl;
 
