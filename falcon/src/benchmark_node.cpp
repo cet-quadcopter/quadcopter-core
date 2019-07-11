@@ -30,9 +30,9 @@ int main() {
   AttitudeSensor att_sensor(AttitudeSensorParams {
     .accelerometer_gain = 0.2,
     .magnetometer_gain = 0.5,
+    .covariance_gyro = Matrix3f::Identity() * 0.0001,
     .covariance_accelerometer = Matrix3f::Identity() * 0.0001,
-    .covariance_magnetometer = Matrix3f::Identity() * 0.0001,
-    .covariance_gyro = Matrix3f::Identity() * 0.0001
+    .covariance_magnetometer = Matrix3f::Identity() * 0.0001
   });
 
   std::cout << "=== Attitude sensor ===" << std::endl;

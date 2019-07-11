@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include "ros/ros.h"
-#include "spdlog/spdlog.h"
 #include "Eigen/Dense"
 #include "falcon/state/manager.h"
 #include "falcon/control/velocity_control.h"
@@ -81,9 +80,9 @@ int main(int argc, char **argv) {
   auto attitude_sensor_params = AttitudeSensorParams {
     .accelerometer_gain = 0.9,
     .magnetometer_gain = 0.9,
+    .covariance_gyro = Matrix3f::Identity() * 0.0001,
     .covariance_accelerometer = Matrix3f::Identity() * 0.0001,
-    .covariance_magnetometer = Matrix3f::Identity() * 0.0001,
-    .covariance_gyro = Matrix3f::Identity() * 0.0001
+    .covariance_magnetometer = Matrix3f::Identity() * 0.0001
   };
 
   auto linear_velocity_sensor_params = LinearVelocitySensorParams {
@@ -96,8 +95,8 @@ int main(int argc, char **argv) {
   };
 
   auto gravity_sensor_params = GravitySensorParams {
-    .threshold = 0.2,
-    .alpha = Vector3f(0, 0, 0.99)
+    .alpha = Vector3f(0, 0, 0.99),
+    .threshold = 0.2
   };
 
   auto sensor_params = SensorParams {
@@ -115,9 +114,9 @@ int main(int argc, char **argv) {
     .torque_ki = Vector3f(1, 1, 1) * 0,
     .torque_kd = Vector3f(1, 1, 1) * 0,
     .m = 2.5,
-    .d = 150,
     .kT = 25,
     .kTau = 125,
+    .d = 150,
     .fx_max_factor = static_cast<float>(std::tan(5.0 * M_PI / 180.0)),
     .fy_max_factor = static_cast<float>(std::tan(5.0 * M_PI / 180.0))
   };

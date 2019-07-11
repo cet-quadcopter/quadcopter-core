@@ -12,7 +12,6 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS roscpp drone_std_msgs drone_constants)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(Boost REQUIRED COMPONENTS system)
-find_package (spdlog REQUIRED COMPONENTS system)
 
 
 ###################################
