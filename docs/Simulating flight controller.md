@@ -6,7 +6,9 @@ Simulating flight controller using AirSim
 2. Python pip `sudo apt install python-pip`
 
 ## Setup
-### Create new catkin wcatkin_create_pkg tutorial_controller rospyorkspace
+
+### Create new catkin workspace
+
 ``` sh
 mkdir drone_workspace
 cd drone_workspace
